@@ -1,4 +1,4 @@
-name: Deploy to Lightsail
+name: Deploy to Lightsail (Next.js + PM2)
 
 on:
   push:
@@ -13,19 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm install
-
-      - name: Build frontend
-        working-directory: frontend
-        run: npm run build
-
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -33,9 +20,23 @@ jobs:
           chmod 600 ~/.ssh/lightsail.pem
           ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Lightsail
+      - name: Sync repo to server
         run: |
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/lightsail.pem" \
-            frontend/dist/ \
-            ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:/var/www/html
+            --exclude ".git" \
+            --exclude "**/node_modules" \
+            ./ \
+            ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:~/jones-county-xc
+
+      - name: Build and restart on server (PM2)
+        run: |
+          ssh -i ~/.ssh/lightsail.pem ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} "bash -lc '
+            set -e
+            cd ~/jones-county-xc/frontend
+            npm install
+            npm run build
+            pm2 delete jones-county-xc 2>/dev/null || true
+            pm2 start npm --name \"jones-county-xc\" -- start
+            pm2 save
+          '"
