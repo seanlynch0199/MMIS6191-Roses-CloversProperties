@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #0B3A6E;
+  --color-accent: #1B7A3A;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f8fafc;
+  --color-card: #ffffff;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+}
+
+.dark {
+  --color-primary: #66a5e0;
+  --color-accent: #47af67;
+  --color-bg: #0f172a;
+  --color-bg-alt: #1e293b;
+  --color-card: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Print styles for Results and Records pages */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  table {
+    font-size: 10pt;
+  }
+
+  th, td {
+    padding: 4px 8px !important;
+  }
+
+  .print-full-width {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Hero background pattern */
+.hero-pattern {
+  background-image:
+    radial-gradient(circle at 25px 25px, rgba(255,255,255,0.1) 2px, transparent 0),
+    radial-gradient(circle at 75px 75px, rgba(255,255,255,0.05) 2px, transparent 0);
+  background-size: 100px 100px;
+}
+
+/* Smooth transitions for dark mode */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
