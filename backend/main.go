@@ -1,18 +1,29 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
+
+// Simple in-memory token store (in production, use Redis or database)
+var (
+	tokenStore = make(map[string]time.Time)
+	tokenMutex sync.RWMutex
+)
 
 // --- Response types ---
 
@@ -27,6 +38,30 @@ type Athlete struct {
 	Grade                 int       `json:"grade"`
 	PersonalRecordSeconds int       `json:"personal_record_seconds"`
 	CreatedAt             time.Time `json:"created_at"`
+}
+
+// AthleteAdmin is used for admin CRUD with firstName/lastName support
+type AthleteAdmin struct {
+	ID        string   `json:"id"`
+	FirstName string   `json:"firstName"`
+	LastName  string   `json:"lastName"`
+	Grade     *int     `json:"grade,omitempty"`
+	Events    []string `json:"events,omitempty"`
+	Team      *string  `json:"team,omitempty"`
+	CreatedAt string   `json:"createdAt,omitempty"`
+	UpdatedAt string   `json:"updatedAt,omitempty"`
+}
+
+type LoginRequest struct {
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
 type Meet struct {
@@ -60,8 +95,10 @@ func main() {
 	http.HandleFunc("/api/health", healthHandler)
 	http.HandleFunc("/api/hello", helloHandler)
 	http.HandleFunc("/api/athletes", athletesHandler)
+	http.HandleFunc("/api/athletes/", athleteByIDHandler)
 	http.HandleFunc("/api/meets", meetsHandler)
 	http.HandleFunc("/api/results", resultsHandler)
+	http.HandleFunc("/api/admin/login", adminLoginHandler)
 
 	port := getEnv("PORT", "8080")
 	fmt.Printf("Server starting on port %s...\n", port)
@@ -122,11 +159,21 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func athletesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	switch r.Method {
+	case http.MethodGet:
+		getAthletes(w, r)
+	case http.MethodPost:
+		if !validateToken(r) {
+			jsonError(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		createAthlete(w, r)
+	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
 	}
+}
 
+func getAthletes(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.Query("SELECT id, name, grade, personal_record_seconds, created_at FROM athletes ORDER BY created_at DESC")
 	if err != nil {
 		log.Printf("Error querying athletes: %v", err)
@@ -135,19 +182,163 @@ func athletesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	athletes := []Athlete{}
+	athletes := []AthleteAdmin{}
 	for rows.Next() {
-		var a Athlete
-		if err := rows.Scan(&a.ID, &a.Name, &a.Grade, &a.PersonalRecordSeconds, &a.CreatedAt); err != nil {
+		var id int
+		var name string
+		var grade int
+		var prSeconds int
+		var createdAt time.Time
+		if err := rows.Scan(&id, &name, &grade, &prSeconds, &createdAt); err != nil {
 			log.Printf("Error scanning athlete row: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		athletes = append(athletes, a)
+		// Split name into first/last
+		parts := strings.SplitN(name, " ", 2)
+		firstName := parts[0]
+		lastName := ""
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+		athletes = append(athletes, AthleteAdmin{
+			ID:        strconv.Itoa(id),
+			FirstName: firstName,
+			LastName:  lastName,
+			Grade:     &grade,
+			CreatedAt: createdAt.Format(time.RFC3339),
+		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(athletes)
+}
+
+func createAthlete(w http.ResponseWriter, r *http.Request) {
+	var input AthleteAdmin
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if input.FirstName == "" || input.LastName == "" {
+		jsonError(w, "firstName and lastName are required", http.StatusBadRequest)
+		return
+	}
+
+	fullName := input.FirstName + " " + input.LastName
+	grade := 0
+	if input.Grade != nil {
+		grade = *input.Grade
+	}
+
+	result, err := db.Exec("INSERT INTO athletes (name, grade, personal_record_seconds) VALUES (?, ?, 0)", fullName, grade)
+	if err != nil {
+		log.Printf("Error creating athlete: %v", err)
+		jsonError(w, "Failed to create athlete", http.StatusInternalServerError)
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	output := AthleteAdmin{
+		ID:        strconv.FormatInt(id, 10),
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Grade:     input.Grade,
+		Events:    input.Events,
+		Team:      input.Team,
+		CreatedAt: time.Now().Format(time.RFC3339),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(output)
+}
+
+func athleteByIDHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract ID from URL path: /api/athletes/{id}
+	path := strings.TrimPrefix(r.URL.Path, "/api/athletes/")
+	id := strings.TrimSuffix(path, "/")
+	if id == "" {
+		jsonError(w, "Athlete ID required", http.StatusBadRequest)
+		return
+	}
+
+	if !validateToken(r) {
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodPut:
+		updateAthlete(w, r, id)
+	case http.MethodDelete:
+		deleteAthlete(w, r, id)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func updateAthlete(w http.ResponseWriter, r *http.Request, id string) {
+	var input AthleteAdmin
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if input.FirstName == "" || input.LastName == "" {
+		jsonError(w, "firstName and lastName are required", http.StatusBadRequest)
+		return
+	}
+
+	fullName := input.FirstName + " " + input.LastName
+	grade := 0
+	if input.Grade != nil {
+		grade = *input.Grade
+	}
+
+	result, err := db.Exec("UPDATE athletes SET name = ?, grade = ? WHERE id = ?", fullName, grade, id)
+	if err != nil {
+		log.Printf("Error updating athlete: %v", err)
+		jsonError(w, "Failed to update athlete", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		jsonError(w, "Athlete not found", http.StatusNotFound)
+		return
+	}
+
+	output := AthleteAdmin{
+		ID:        id,
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Grade:     input.Grade,
+		Events:    input.Events,
+		Team:      input.Team,
+		UpdatedAt: time.Now().Format(time.RFC3339),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(output)
+}
+
+func deleteAthlete(w http.ResponseWriter, r *http.Request, id string) {
+	result, err := db.Exec("DELETE FROM athletes WHERE id = ?", id)
+	if err != nil {
+		log.Printf("Error deleting athlete: %v", err)
+		jsonError(w, "Failed to delete athlete", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		jsonError(w, "Athlete not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func meetsHandler(w http.ResponseWriter, r *http.Request) {
@@ -208,6 +399,82 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+// --- Admin Auth ---
+
+func adminLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Get admin password from environment variable
+	adminPassword := getEnv("ADMIN_PASSWORD", "admin123")
+
+	if req.Password != adminPassword {
+		jsonError(w, "Invalid password", http.StatusUnauthorized)
+		return
+	}
+
+	// Generate token
+	token := generateToken()
+
+	// Store token with expiration (24 hours)
+	tokenMutex.Lock()
+	tokenStore[token] = time.Now().Add(24 * time.Hour)
+	tokenMutex.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(LoginResponse{Token: token})
+}
+
+func generateToken() string {
+	bytes := make([]byte, 32)
+	rand.Read(bytes)
+	return hex.EncodeToString(bytes)
+}
+
+func validateToken(r *http.Request) bool {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return false
+	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return false
+	}
+
+	token := parts[1]
+
+	tokenMutex.RLock()
+	expiry, exists := tokenStore[token]
+	tokenMutex.RUnlock()
+
+	if !exists || time.Now().After(expiry) {
+		if exists {
+			// Clean up expired token
+			tokenMutex.Lock()
+			delete(tokenStore, token)
+			tokenMutex.Unlock()
+		}
+		return false
+	}
+
+	return true
+}
+
+func jsonError(w http.ResponseWriter, message string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(ErrorResponse{Error: message})
 }
 
 // --- Middleware ---
