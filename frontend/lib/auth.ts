@@ -1,3 +1,5 @@
+'use client'
+
 const TOKEN_KEY = 'auth_token'
 
 export function getToken(): string | null {
@@ -56,7 +58,7 @@ export async function authFetch(
 }
 
 export async function adminLogin(password: string): Promise<string> {
-  const response = await fetch(`${BASE_URL}/api/admin/login`, {
+  const response = await fetch('/api/admin/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
