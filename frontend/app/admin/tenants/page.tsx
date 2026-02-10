@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { AdminLayout } from '@/components/admin/AdminLayout'
 import { fetchTenants, createTenant, updateTenant, deleteTenant } from '@/lib/api'
 import { Tenant, TenantCreate } from '@/data/types'
 
@@ -69,7 +68,8 @@ export default function AdminTenantsPage() {
   }
 
   return (
-    <AdminLayout title="Tenants">
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Tenants</h1>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -189,7 +189,7 @@ export default function AdminTenantsPage() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </div>
   )
 }
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { AdminLayout } from '@/components/admin/AdminLayout'
 import { fetchAdminProperties, createProperty, updateProperty, deleteProperty } from '@/lib/api'
 import { Property, PropertyCreate } from '@/data/types'
 
@@ -79,7 +78,8 @@ export default function AdminPropertiesPage() {
   }
 
   return (
-    <AdminLayout title="Properties">
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Properties</h1>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -213,7 +213,7 @@ export default function AdminPropertiesPage() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </div>
   )
 }
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { AdminLayout } from '@/components/admin/AdminLayout'
 import { fetchLeases, fetchAdminProperties, fetchTenants, createLease, updateLease, deleteLease } from '@/lib/api'
 import { Lease, LeaseCreate, Property, Tenant } from '@/data/types'
 
@@ -106,7 +105,8 @@ export default function AdminLeasesPage() {
   }
 
   return (
-    <AdminLayout title="Leases">
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Leases</h1>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -252,7 +252,7 @@ export default function AdminLeasesPage() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </div>
   )
 }
 

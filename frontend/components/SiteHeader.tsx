@@ -82,7 +82,7 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              href="/admin/login"
+              href="/admin"
               className="ml-2 px-4 py-2 text-sm font-medium text-white bg-clover-600 hover:bg-clover-700 rounded-md transition-colors"
             >
               Admin Login
@@ -131,7 +131,7 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              href="/admin/login"
+              href="/admin"
               onClick={() => setMobileMenuOpen(false)}
               className="block mt-2 mx-4 px-4 py-2 text-sm font-medium text-center text-white bg-clover-600 hover:bg-clover-700 rounded-md transition-colors"
             >

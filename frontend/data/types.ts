@@ -89,23 +89,9 @@ export interface LeaseCreate {
   status?: LeaseStatus
 }
 
-// Dashboard stats
-export interface DashboardStats {
-  totalProperties: number
-  availableProperties: number
-  totalTenants: number
-  activeLeases: number
-  upcomingLeases?: number
-  monthlyRevenue?: number
-}
-
 // API Response types
 export interface ApiError {
   error: string
-}
-
-export interface LoginResponse {
-  token: string
 }
 
 // Site configuration
