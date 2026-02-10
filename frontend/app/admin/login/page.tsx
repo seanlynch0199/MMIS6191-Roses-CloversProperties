@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { adminLogin, isAuthed } from '@/lib/auth'
+import { login, getToken } from '@/lib/api'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -11,7 +11,7 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (isAuthed()) {
+    if (getToken()) {
       router.replace('/admin/dashboard')
     }
   }, [router])
@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      await adminLogin(password)
+      await login(password)
       router.replace('/admin/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred')
@@ -34,11 +34,23 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <svg className="w-12 h-12" viewBox="0 0 40 40" fill="none">
+            <circle cx="14" cy="12" r="6" className="fill-clover-500" />
+            <circle cx="26" cy="12" r="6" className="fill-clover-500" />
+            <circle cx="20" cy="6" r="6" className="fill-clover-500" />
+            <path d="M20 18 L20 36" className="stroke-clover-600" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="30" cy="28" r="5" className="fill-rose-500" />
+            <circle cx="34" cy="24" r="3" className="fill-rose-400" />
+          </svg>
+        </div>
+
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-1">
           Admin Login
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Jones County Cross Country
+        <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+          Roses & Clovers Properties
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -58,7 +70,7 @@ export default function AdminLoginPage() {
               required
               disabled={isLoading}
               autoFocus
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-prBlue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -71,7 +83,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-prBlue-600 hover:bg-prBlue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+            className="w-full py-3 px-4 bg-clover-600 hover:bg-clover-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>

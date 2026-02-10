@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: ['cross country', 'track', 'running', 'high school', 'Pine Ridge', 'Timberwolves', 'North Georgia'],
+  keywords: ['rental properties', 'apartments', 'houses', 'property management', 'Portland', 'Oregon'],
   authors: [{ name: siteConfig.name }],
   openGraph: {
     type: 'website',
@@ -42,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
