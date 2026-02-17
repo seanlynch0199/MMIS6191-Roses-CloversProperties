@@ -71,6 +71,7 @@ jobs:
 
             # --- Backend ---
             cd ~/roses-clovers-properties/backend
+            go mod tidy
             pm2 delete jones-xc-api 2>/dev/null || true
             pm2 delete rc-backend 2>/dev/null || true
             pm2 start \"go run main.go\" --name rc-backend
