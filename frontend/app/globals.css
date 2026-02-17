@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #0B3A6E;
-  --color-accent: #1B7A3A;
+  --color-primary: #16a34a;
+  --color-secondary: #e11d48;
   --color-bg: #ffffff;
   --color-bg-alt: #f8fafc;
   --color-card: #ffffff;
@@ -14,8 +14,8 @@
 }
 
 .dark {
-  --color-primary: #66a5e0;
-  --color-accent: #47af67;
+  --color-primary: #4ade80;
+  --color-secondary: #fb7185;
   --color-bg: #0f172a;
   --color-bg-alt: #1e293b;
   --color-card: #1e293b;
@@ -29,7 +29,7 @@ body {
   color: var(--color-text);
 }
 
-/* Print styles for Results and Records pages */
+/* Print styles */
 @media print {
   .no-print {
     display: none !important;
@@ -88,4 +88,28 @@ body {
 /* Smooth transitions for dark mode */
 * {
   transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Form input focus states */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  ring: 2px;
+  ring-offset: 2px;
+}
+
+/* Status badge styles */
+.status-active {
+  @apply bg-clover-100 text-clover-800 dark:bg-clover-900/30 dark:text-clover-400;
+}
+
+.status-upcoming {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+}
+
+.status-ended {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400;
+}
+
+.status-terminated {
+  @apply bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400;
 }

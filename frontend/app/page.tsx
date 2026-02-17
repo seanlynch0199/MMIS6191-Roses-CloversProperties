@@ -3,61 +3,44 @@
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { siteConfig } from '@/data/site'
-import { StatCard } from '@/components/StatCard'
-import { Button } from '@/components/ui/Button'
-import { fetchMeets, fetchAthletes, fetchResults } from '@/lib/api'
+import { fetchProperties } from '@/lib/api'
+import { PropertyCard } from '@/components/PropertyCard'
 
 export default function HomePage() {
-  const { data: meets, isLoading: meetsLoading, isError: meetsError, error: meetsErr, refetch: refetchMeets } = useQuery({
-    queryKey: ['meets'],
-    queryFn: fetchMeets,
+  const { data: properties, isLoading } = useQuery({
+    queryKey: ['properties', { available: true }],
+    queryFn: () => fetchProperties({ available: true }),
   })
 
-  const { data: athletes } = useQuery({
-    queryKey: ['athletes'],
-    queryFn: fetchAthletes,
-  })
-
-  const { data: results } = useQuery({
-    queryKey: ['results'],
-    queryFn: fetchResults,
-  })
-
-  // Sort meets by date ascending, take next 5
-  const upcomingMeets = meets
-    ? [...meets].sort((a, b) => a.meet_date.localeCompare(b.meet_date)).slice(0, 5)
-    : []
+  const featuredProperties = properties?.slice(0, 3) || []
 
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-prBlue-500 hero-pattern overflow-hidden">
+      <section className="relative bg-gradient-to-br from-clover-600 to-clover-800 hero-pattern overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
               {siteConfig.name}
             </h1>
-            <p className="text-xl md:text-2xl text-prBlue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-clover-100 mb-8 max-w-2xl mx-auto">
               {siteConfig.tagline}
+            </p>
+            <p className="text-lg text-clover-200 mb-8 max-w-xl mx-auto">
+              {siteConfig.description}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
-                href="/schedules"
-                className="px-6 py-3 bg-white text-prBlue-600 font-semibold rounded-lg hover:bg-prBlue-50 transition-colors"
+                href="/properties"
+                className="px-8 py-3 bg-white text-clover-700 font-semibold rounded-lg hover:bg-clover-50 transition-colors shadow-lg"
               >
-                View Schedule
+                Browse Properties
               </Link>
               <Link
-                href="/runners"
-                className="px-6 py-3 bg-prGreen-500 text-white font-semibold rounded-lg hover:bg-prGreen-600 transition-colors"
+                href="/contact"
+                className="px-8 py-3 bg-rose-500 text-white font-semibold rounded-lg hover:bg-rose-600 transition-colors shadow-lg"
               >
-                Explore Runners
-              </Link>
-              <Link
-                href="/top-hounds"
-                className="px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors"
-              >
-                Top Hounds
+                Contact Us
               </Link>
             </div>
           </div>
@@ -73,212 +56,115 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Upcoming Meets */}
+      {/* Featured Properties */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-              Upcoming Meets
-            </h2>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                Featured Properties
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Discover our available rentals
+              </p>
+            </div>
             <Link
-              href="/schedules"
-              className="text-prBlue-600 dark:text-prBlue-400 hover:underline font-medium"
+              href="/properties"
+              className="text-clover-600 dark:text-clover-400 hover:underline font-medium"
             >
-              View Full Schedule
+              View All Properties
             </Link>
           </div>
 
-          {meetsLoading && (
-            <div className="grid gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse"
-                >
-                  <div className="flex-shrink-0 w-16 text-center">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-10 mx-auto mb-1" />
-                    <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-8 mx-auto" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2" />
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-                  </div>
-                </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-xl h-80 animate-pulse" />
               ))}
             </div>
-          )}
-
-          {meetsError && (
-            <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <p className="text-gray-500 dark:text-gray-400 mb-1">Failed to load meets.</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
-                {meetsErr instanceof Error ? meetsErr.message : 'An unexpected error occurred.'}
+          ) : featuredProperties.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl">
+              <p className="text-gray-500 dark:text-gray-400">
+                No available properties at the moment. Check back soon!
               </p>
-              <Button variant="outline" onClick={() => refetchMeets()}>
-                Retry
-              </Button>
             </div>
-          )}
-
-          {meets && upcomingMeets.length > 0 && (
-            <div className="grid gap-4">
-              {upcomingMeets.map((meet) => {
-                const date = new Date(meet.meet_date + 'T00:00:00')
-                const month = date.toLocaleDateString('en-US', { month: 'short' })
-                const day = date.getDate()
-
-                return (
-                  <div
-                    key={meet.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-                  >
-                    <div className="flex-shrink-0 w-16 text-center">
-                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        {month}
-                      </div>
-                      <div className="text-2xl font-bold text-prBlue-600 dark:text-prBlue-400">
-                        {day}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {meet.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{meet.location}</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {meets && upcomingMeets.length === 0 && (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-              No upcoming meets scheduled. Check back soon!
-            </p>
           )}
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Why Choose Us */}
       <section className="py-16 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
-            Program Highlights
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            Why Choose Roses & Clovers?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              label="Active Athletes"
-              value={athletes?.length ?? '...'}
-              description="In database"
-              variant="highlight"
-            />
-            <StatCard
-              label="Scheduled Meets"
-              value={meets?.length ?? '...'}
-              description="This season"
-              variant="accent"
-            />
-            <StatCard
-              label="Race Results"
-              value={results?.length ?? '...'}
-              description="Recorded"
-            />
-            <StatCard
-              label="State Qualifiers"
-              value="12"
-              description="2024 Season"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Links Section */}
-      <section className="py-16 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
-            Explore
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Link
-              href="/runners"
-              className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-prBlue-300 dark:hover:border-prBlue-600 transition-all hover:shadow-lg"
-            >
-              <div className="w-12 h-12 bg-prBlue-100 dark:bg-prBlue-900 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-prBlue-600 dark:text-prBlue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-clover-100 dark:bg-clover-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-clover-600 dark:text-clover-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Runners</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Meet our athletes and explore their profiles and PRs.
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Quality Properties</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Every property is carefully maintained and updated to ensure your comfort and satisfaction.
               </p>
-            </Link>
-
-            <Link
-              href="/results"
-              className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-prBlue-300 dark:hover:border-prBlue-600 transition-all hover:shadow-lg"
-            >
-              <div className="w-12 h-12 bg-prGreen-100 dark:bg-prGreen-900 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-prGreen-600 dark:text-prGreen-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </div>
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Results</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                View meet results, team scores, and individual times.
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Personal Touch</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                We treat every tenant like family, providing responsive service and genuine care.
               </p>
-            </Link>
-
-            <Link
-              href="/top-hounds"
-              className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-prBlue-300 dark:hover:border-prBlue-600 transition-all hover:shadow-lg"
-            >
-              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </div>
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Top Hounds</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                All-time records, rankings, and championship history.
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Trusted Service</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Transparent policies, fair pricing, and honest communication you can count on.
               </p>
-            </Link>
-
-            <Link
-              href="/home-meet"
-              className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-prBlue-300 dark:hover:border-prBlue-600 transition-all hover:shadow-lg"
-            >
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Home Meet</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Course info, spectator spots, and meet day details.
-              </p>
-            </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-prGreen-500">
+      <section className="py-16 bg-gradient-to-r from-rose-500 to-rose-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Go Timberwolves!
+            Ready to Find Your New Home?
           </h2>
-          <p className="text-prGreen-100 mb-8 max-w-2xl mx-auto">
-            Follow our teams throughout the season. Check schedules, results, and cheer on our runners as they chase their goals.
+          <p className="text-rose-100 mb-8 max-w-2xl mx-auto">
+            Browse our available properties or get in touch with us to discuss your housing needs.
           </p>
-          <Link
-            href="/schedules"
-            className="inline-block px-6 py-3 bg-white text-prGreen-600 font-semibold rounded-lg hover:bg-prGreen-50 transition-colors"
-          >
-            View Full Schedule
-          </Link>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/properties"
+              className="px-8 py-3 bg-white text-rose-600 font-semibold rounded-lg hover:bg-rose-50 transition-colors"
+            >
+              View Properties
+            </Link>
+            <Link
+              href="/contact"
+              className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Contact Us
+            </Link>
+          </div>
         </div>
       </section>
     </div>

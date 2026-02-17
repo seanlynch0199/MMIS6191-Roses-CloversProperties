@@ -1,7 +1,7 @@
 {
-  "name": "pine-ridge-running-club",
+  "name": "roses-clovers-properties",
   "version": "1.0.0",
-  "description": "Pine Ridge Running Club - Cross Country & Track",
+  "description": "Roses & Clovers Properties - Rental Property Management",
   "private": true,
   "scripts": {
     "dev": "next dev",
