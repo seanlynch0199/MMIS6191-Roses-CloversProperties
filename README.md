@@ -1,108 +1,172 @@
-# Jones County XC
+# Roses & Clovers Properties
 
-A full-stack web application with React frontend and Go backend.
+A property management web application for managing rental properties, tenants, and leases.
+
+## Features
+
+- **Public Website**: Browse available properties, view details, contact form
+- **Admin Dashboard**: Manage properties, tenants, and lease agreements
+- **Lease Management**: Track active, upcoming, and ended leases with overlapping prevention
+- **Responsive Design**: Works on desktop and mobile with dark mode support
+
+## Tech Stack
+
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-first styling
+- **TanStack Query** - Data fetching and caching
+
+### Backend
+- **Go 1.21+** - REST API server
+- **MySQL** - Database
+- **Token-based auth** - Admin authentication
 
 ## Project Structure
 
 ```
-jones-county-xc/
-├── frontend/          # React + Vite + Tailwind CSS
-├── backend/           # Go HTTP server
-├── docs/             # Documentation
-└── README.md         # This file
+roses-clovers-properties/
+├── frontend/              # Next.js frontend
+│   ├── app/              # App Router pages
+│   ├── components/       # React components
+│   ├── data/            # Types and site config
+│   └── lib/             # API client and utilities
+├── backend/              # Go backend
+│   ├── main.go          # API server
+│   └── sql/             # Database schema
+└── README.md
 ```
-
-## Prerequisites
-
-- **Node.js** (v18 or higher) - for frontend
-- **Go** (v1.21 or higher) - for backend
-- **npm** or **yarn** - package manager
 
 ## Getting Started
 
-### Frontend Setup
+### Prerequisites
 
-The frontend is built with React, Vite, and Tailwind CSS.
+- Node.js 18+
+- Go 1.21+
+- MySQL 8.0+
 
-```bash
-cd frontend
-npm install
-npm run dev
+### Database Setup
+
+1. Create a MySQL database:
+```sql
+CREATE DATABASE roses_clovers;
 ```
 
-The frontend will be available at `http://localhost:5173`
+2. Run the schema migration:
+```bash
+mysql -u root -p roses_clovers < backend/sql/001_create_tables.sql
+```
 
-#### Frontend Commands
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+3. (Optional) Load seed data:
+```bash
+mysql -u root -p roses_clovers < backend/sql/002_seed_data.sql
+```
 
 ### Backend Setup
 
-The backend is a Go HTTP server with CORS enabled.
+1. Set environment variables:
+```bash
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_USER=root
+export DB_PASSWORD=yourpassword
+export DB_NAME=roses_clovers
+export ADMIN_PASSWORD=admin123  # Change in production!
+```
 
+2. Run the server:
 ```bash
 cd backend
 go run main.go
 ```
 
-The backend will be available at `http://localhost:8080`
+The API will be available at `http://localhost:8080`
 
-#### API Endpoints
+### Frontend Setup
 
-- `GET /api/health` - Health check endpoint
-- `GET /api/hello` - Hello world endpoint
+1. Install dependencies:
+```bash
+cd frontend
+npm install
+```
 
-#### Backend Commands
+2. Create `.env.local`:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
 
-- `go run main.go` - Start development server
-- `go build` - Build binary
-- `go test ./...` - Run tests
+3. Run the development server:
+```bash
+npm run dev
+```
+
+The frontend will be available at `http://localhost:3000`
+
+## API Endpoints
+
+### Public
+- `GET /api/properties` - List available properties (supports filters)
+- `GET /api/properties/:id` - Get property details
+
+### Admin (requires auth token)
+- `POST /api/admin/login` - Login with password
+- `POST /api/admin/logout` - Logout
+- `GET /api/admin/me` - Check auth status
+- `GET /api/admin/dashboard/stats` - Dashboard statistics
+
+#### Properties
+- `GET /api/admin/properties` - List all properties
+- `POST /api/admin/properties` - Create property
+- `PUT /api/admin/properties/:id` - Update property
+- `DELETE /api/admin/properties/:id` - Delete property
+
+#### Tenants
+- `GET /api/admin/tenants` - List all tenants
+- `POST /api/admin/tenants` - Create tenant
+- `PUT /api/admin/tenants/:id` - Update tenant
+- `DELETE /api/admin/tenants/:id` - Delete tenant
+
+#### Leases
+- `GET /api/admin/leases` - List all leases (supports status filter)
+- `POST /api/admin/leases` - Create lease
+- `PUT /api/admin/leases/:id` - Update lease
+- `DELETE /api/admin/leases/:id` - Delete lease
+
+## Admin Access
+
+Default admin password: `admin123` (set via `ADMIN_PASSWORD` env var)
+
+Access the admin panel at `/admin/login`
 
 ## Development
 
 ### Running Both Services
 
-Open two terminal windows:
-
 **Terminal 1 - Backend:**
 ```bash
-cd backend
-go run main.go
+cd backend && go run main.go
 ```
 
 **Terminal 2 - Frontend:**
 ```bash
+cd frontend && npm run dev
+```
+
+### Building for Production
+
+**Frontend:**
+```bash
 cd frontend
-npm run dev
+npm run build
+npm start
 ```
 
-### Making API Calls from Frontend
-
-The backend has CORS enabled, so you can make requests from the frontend:
-
-```javascript
-fetch('http://localhost:8080/api/hello')
-  .then(res => res.json())
-  .then(data => console.log(data))
+**Backend:**
+```bash
+cd backend
+go build -o server main.go
+./server
 ```
-
-## Tech Stack
-
-### Frontend
-- **React** - UI library
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-
-### Backend
-- **Go** - Programming language
-- **net/http** - Standard library HTTP server
-
-## Project Information
-
-This project uses a monorepo structure with separate frontend and backend directories.
 
 ## License
 
