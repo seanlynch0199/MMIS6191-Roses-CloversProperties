@@ -20,19 +20,22 @@ export default function AdminLeasesPage() {
   const [error, setError] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('')
 
-  const { data: leases, isLoading } = useQuery({
+  const { data: leases, isLoading, isError, error: queryError } = useQuery({
     queryKey: ['admin-leases', statusFilter],
     queryFn: () => fetchLeases(statusFilter ? { status: statusFilter } : undefined),
+    retry: false,
   })
 
   const { data: properties } = useQuery({
     queryKey: ['admin-properties'],
     queryFn: fetchAdminProperties,
+    retry: false,
   })
 
   const { data: tenants } = useQuery({
     queryKey: ['admin-tenants'],
     queryFn: fetchTenants,
+    retry: false,
   })
 
   const createMutation = useMutation({
@@ -133,9 +136,9 @@ export default function AdminLeasesPage() {
           </button>
         </div>
 
-        {error && (
+        {(error || isError) && (
           <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-            {error}
+            {error || (queryError instanceof Error ? queryError.message : 'Failed to load leases')}
           </div>
         )}
 
@@ -272,7 +275,7 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
     startDate: lease?.startDate || new Date().toISOString().split('T')[0],
     endDate: lease?.endDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     monthlyRent: lease?.monthlyRent || 0,
-    securityDeposit: lease?.securityDeposit || undefined,
+    depositAmount: lease?.depositAmount || undefined,
     status: lease?.status || 'upcoming',
   })
 
@@ -306,7 +309,7 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
                   ...formData,
                   propertyId: propId,
                   monthlyRent: formData.monthlyRent || prop?.monthlyRent || 0,
-                  securityDeposit: formData.securityDeposit || prop?.securityDeposit,
+                  depositAmount: formData.depositAmount || prop?.depositAmount,
                 })
               }}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -381,13 +384,13 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Security Deposit
+                Deposit Amount
               </label>
               <input
                 type="number"
                 min={0}
-                value={formData.securityDeposit || ''}
-                onChange={(e) => setFormData({ ...formData, securityDeposit: parseInt(e.target.value) || undefined })}
+                value={formData.depositAmount || ''}
+                onChange={(e) => setFormData({ ...formData, depositAmount: parseInt(e.target.value) || undefined })}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

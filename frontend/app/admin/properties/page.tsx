@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchAdminProperties, createProperty, updateProperty, deleteProperty } from '@/lib/api'
 import { Property, PropertyCreate } from '@/data/types'
 
-const propertyTypes = ['apartment', 'house', 'condo', 'townhouse', 'studio']
+const propertyTypes = ['apartment', 'house', 'duplex', 'condo', 'townhouse', 'studio']
 
 export default function AdminPropertiesPage() {
   const queryClient = useQueryClient()
@@ -14,9 +14,10 @@ export default function AdminPropertiesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [error, setError] = useState('')
 
-  const { data: properties, isLoading } = useQuery({
+  const { data: properties, isLoading, isError, error: queryError } = useQuery({
     queryKey: ['admin-properties'],
     queryFn: fetchAdminProperties,
+    retry: false,
   })
 
   const createMutation = useMutation({
@@ -94,9 +95,9 @@ export default function AdminPropertiesPage() {
           </button>
         </div>
 
-        {error && (
+        {(error || isError) && (
           <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-            {error}
+            {error || (queryError instanceof Error ? queryError.message : 'Failed to load properties')}
           </div>
         )}
 
@@ -236,11 +237,10 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
     bedrooms: property?.bedrooms || 1,
     bathrooms: property?.bathrooms || 1,
     squareFeet: property?.squareFeet || undefined,
-    yearBuilt: property?.yearBuilt || undefined,
     description: property?.description || '',
     amenities: property?.amenities || [],
     monthlyRent: property?.monthlyRent || 0,
-    securityDeposit: property?.securityDeposit || undefined,
+    depositAmount: property?.depositAmount || undefined,
     available: property?.available ?? true,
   })
 
@@ -417,20 +417,6 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Year Built
-              </label>
-              <input
-                type="number"
-                min={1800}
-                max={new Date().getFullYear()}
-                value={formData.yearBuilt || ''}
-                onChange={(e) => setFormData({ ...formData, yearBuilt: parseInt(e.target.value) || undefined })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Monthly Rent *
               </label>
               <input
@@ -445,13 +431,13 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Security Deposit
+                Deposit Amount
               </label>
               <input
                 type="number"
                 min={0}
-                value={formData.securityDeposit || ''}
-                onChange={(e) => setFormData({ ...formData, securityDeposit: parseInt(e.target.value) || undefined })}
+                value={formData.depositAmount || ''}
+                onChange={(e) => setFormData({ ...formData, depositAmount: parseInt(e.target.value) || undefined })}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
               />
             </div>

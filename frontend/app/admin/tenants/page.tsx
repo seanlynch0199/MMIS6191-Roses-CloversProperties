@@ -12,9 +12,10 @@ export default function AdminTenantsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
   const [error, setError] = useState('')
 
-  const { data: tenants, isLoading } = useQuery({
+  const { data: tenants, isLoading, isError, error: queryError } = useQuery({
     queryKey: ['admin-tenants'],
     queryFn: fetchTenants,
+    retry: false,
   })
 
   const createMutation = useMutation({
@@ -83,9 +84,9 @@ export default function AdminTenantsPage() {
           </button>
         </div>
 
-        {error && (
+        {(error || isError) && (
           <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
-            {error}
+            {error || (queryError instanceof Error ? queryError.message : 'Failed to load tenants')}
           </div>
         )}
 

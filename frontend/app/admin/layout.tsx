@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { isLoggedIn, adminLogout } from '@/lib/api'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', exact: true },
@@ -12,10 +14,42 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [authChecked, setAuthChecked] = useState(false)
+
+  // Skip auth check for the login page itself
+  const isLoginPage = pathname === '/admin/login'
+
+  useEffect(() => {
+    if (!isLoginPage && !isLoggedIn()) {
+      router.replace('/admin/login')
+    } else {
+      setAuthChecked(true)
+    }
+  }, [pathname, isLoginPage, router])
 
   function isActive(item: { href: string; exact?: boolean }) {
     if (item.exact) return pathname === item.href
     return pathname === item.href || pathname.startsWith(item.href + '/')
+  }
+
+  async function handleLogout() {
+    await adminLogout()
+    router.replace('/admin/login')
+  }
+
+  // Render login page without the admin chrome
+  if (isLoginPage) {
+    return <>{children}</>
+  }
+
+  // Wait for auth check before rendering protected content
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+      </div>
+    )
   }
 
   return (
@@ -55,12 +89,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </nav>
             </div>
 
-            <Link
-              href="/"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-clover-600 dark:hover:text-clover-400"
-            >
-              Back to Site
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-clover-600 dark:hover:text-clover-400"
+              >
+                Back to Site
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>

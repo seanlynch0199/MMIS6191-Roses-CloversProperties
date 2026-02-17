@@ -8,19 +8,112 @@ import {
   ApiError,
 } from '@/data/types'
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
-async function handleResponse<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const error: ApiError = await res.json().catch(() => ({ error: 'An error occurred' }))
-    throw new Error(error.error || `HTTP ${res.status}`)
+// ============================================================================
+// AUTH TOKEN HELPERS
+// ============================================================================
+
+const TOKEN_KEY = 'rc_token'
+
+export function getToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(TOKEN_KEY)
+}
+
+export function setToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token)
+}
+
+export function clearToken(): void {
+  localStorage.removeItem(TOKEN_KEY)
+}
+
+export function isLoggedIn(): boolean {
+  return !!getToken()
+}
+
+// ============================================================================
+// FETCH WRAPPERS
+// ============================================================================
+
+/**
+ * authFetch — single fetch wrapper for all /api/admin/* requests.
+ * - Injects Authorization: Bearer <token> if a token exists.
+ * - On 401, clears the token and redirects to /admin/login.
+ * - On other errors, throws with the server's error message.
+ */
+export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken()
+  const headers: Record<string, string> = {
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: { ...headers, ...(options.headers as Record<string, string> || {}) },
+  })
+
+  if (res.status === 401) {
+    clearToken()
+    if (typeof window !== 'undefined') {
+      window.location.href = '/admin/login'
+    }
+    throw new Error('Session expired. Please log in again.')
+  }
+
+  if (!res.ok) {
+    const body: ApiError = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(body.error || `HTTP ${res.status}`)
+  }
+
   if (res.status === 204) return undefined as T
   return res.json()
 }
 
+/** Plain fetch for public endpoints (no auth header, no 401 redirect). */
+async function publicFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`)
+  if (!res.ok) {
+    const body: ApiError = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(body.error || `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
 // ============================================================================
-// PROPERTIES
+// AUTH ENDPOINTS
+// ============================================================================
+
+export async function adminLogin(password: string): Promise<string> {
+  const res = await fetch(`${BASE_URL}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  })
+  if (!res.ok) {
+    const error: ApiError = await res.json().catch(() => ({ error: 'Login failed' }))
+    throw new Error(error.error || 'Login failed')
+  }
+  const data = await res.json()
+  setToken(data.token)
+  return data.token
+}
+
+export async function adminLogout(): Promise<void> {
+  try {
+    await fetch(`${BASE_URL}/api/admin/logout`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${getToken() || ''}` },
+    })
+  } finally {
+    clearToken()
+  }
+}
+
+// ============================================================================
+// PUBLIC PROPERTIES (no auth required)
 // ============================================================================
 
 export interface PropertyFilters {
@@ -41,87 +134,72 @@ export async function fetchProperties(filters?: PropertyFilters): Promise<Proper
   if (filters?.search) params.set('search', filters.search)
   if (filters?.type) params.set('type', filters.type)
 
-  const url = `${BASE_URL}/api/properties${params.toString() ? `?${params}` : ''}`
-  const res = await fetch(url)
-  return handleResponse<Property[]>(res)
+  const qs = params.toString()
+  return publicFetch<Property[]>(`/api/properties${qs ? `?${qs}` : ''}`)
 }
 
 export async function fetchProperty(id: number): Promise<Property> {
-  const res = await fetch(`${BASE_URL}/api/properties/${id}`)
-  return handleResponse<Property>(res)
+  return publicFetch<Property>(`/api/properties/${id}`)
 }
 
+// ============================================================================
+// ADMIN PROPERTIES (auth required — all go through authFetch)
+// ============================================================================
+
 export async function fetchAdminProperties(): Promise<Property[]> {
-  const res = await fetch(`${BASE_URL}/api/properties`)
-  return handleResponse<Property[]>(res)
+  return authFetch<Property[]>('/api/admin/properties')
 }
 
 export async function createProperty(data: PropertyCreate): Promise<Property> {
-  const res = await fetch(`${BASE_URL}/api/properties`, {
+  return authFetch<Property>('/api/admin/properties', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return handleResponse<Property>(res)
 }
 
 export async function updateProperty(id: number, data: Partial<PropertyCreate>): Promise<Property> {
-  const res = await fetch(`${BASE_URL}/api/properties/${id}`, {
+  return authFetch<Property>(`/api/admin/properties/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return handleResponse<Property>(res)
 }
 
 export async function deleteProperty(id: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/properties/${id}`, {
-    method: 'DELETE',
-  })
-  return handleResponse<void>(res)
+  return authFetch<void>(`/api/admin/properties/${id}`, { method: 'DELETE' })
 }
 
 // ============================================================================
-// TENANTS
+// ADMIN TENANTS (auth required)
 // ============================================================================
 
 export async function fetchTenants(): Promise<Tenant[]> {
-  const res = await fetch(`${BASE_URL}/api/tenants`)
-  return handleResponse<Tenant[]>(res)
+  return authFetch<Tenant[]>('/api/admin/tenants')
 }
 
 export async function fetchTenant(id: number): Promise<Tenant> {
-  const res = await fetch(`${BASE_URL}/api/tenants/${id}`)
-  return handleResponse<Tenant>(res)
+  return authFetch<Tenant>(`/api/admin/tenants/${id}`)
 }
 
 export async function createTenant(data: TenantCreate): Promise<Tenant> {
-  const res = await fetch(`${BASE_URL}/api/tenants`, {
+  return authFetch<Tenant>('/api/admin/tenants', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return handleResponse<Tenant>(res)
 }
 
 export async function updateTenant(id: number, data: Partial<TenantCreate>): Promise<Tenant> {
-  const res = await fetch(`${BASE_URL}/api/tenants/${id}`, {
+  return authFetch<Tenant>(`/api/admin/tenants/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return handleResponse<Tenant>(res)
 }
 
 export async function deleteTenant(id: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/tenants/${id}`, {
-    method: 'DELETE',
-  })
-  return handleResponse<void>(res)
+  return authFetch<void>(`/api/admin/tenants/${id}`, { method: 'DELETE' })
 }
 
 // ============================================================================
-// LEASES
+// ADMIN LEASES (auth required)
 // ============================================================================
 
 export interface LeaseFilters {
@@ -136,37 +214,28 @@ export async function fetchLeases(filters?: LeaseFilters): Promise<Lease[]> {
   if (filters?.propertyId) params.set('propertyId', String(filters.propertyId))
   if (filters?.tenantId) params.set('tenantId', String(filters.tenantId))
 
-  const url = `${BASE_URL}/api/leases${params.toString() ? `?${params}` : ''}`
-  const res = await fetch(url)
-  return handleResponse<Lease[]>(res)
+  const qs = params.toString()
+  return authFetch<Lease[]>(`/api/admin/leases${qs ? `?${qs}` : ''}`)
 }
 
 export async function fetchLease(id: number): Promise<Lease> {
-  const res = await fetch(`${BASE_URL}/api/leases/${id}`)
-  return handleResponse<Lease>(res)
+  return authFetch<Lease>(`/api/admin/leases/${id}`)
 }
 
 export async function createLease(data: LeaseCreate): Promise<Lease> {
-  const res = await fetch(`${BASE_URL}/api/leases`, {
+  return authFetch<Lease>('/api/admin/leases', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return handleResponse<Lease>(res)
 }
 
 export async function updateLease(id: number, data: Partial<LeaseCreate>): Promise<Lease> {
-  const res = await fetch(`${BASE_URL}/api/leases/${id}`, {
+  return authFetch<Lease>(`/api/admin/leases/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return handleResponse<Lease>(res)
 }
 
 export async function deleteLease(id: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/leases/${id}`, {
-    method: 'DELETE',
-  })
-  return handleResponse<void>(res)
+  return authFetch<void>(`/api/admin/leases/${id}`, { method: 'DELETE' })
 }

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 var db *sql.DB
@@ -109,6 +110,13 @@ type ErrorResponse struct {
 // ============================================================================
 
 func main() {
+	// Load .env file before reading any config
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: no .env file found, relying on exported environment variables")
+	}
+
+	initAllowedOrigins()
+
 	if err := connectDB(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -157,11 +165,13 @@ func main() {
 // ============================================================================
 
 func connectDB() error {
-	host := getEnv("DB_HOST", "localhost")
+	host := getEnv("DB_HOST", "127.0.0.1")
 	port := getEnv("DB_PORT", "3306")
-	user := getEnv("DB_USER", "root")
-	password := getEnv("DB_PASSWORD", "")
-	name := getEnv("DB_NAME", "roses_clovers")
+	user := mustGetEnv("DB_USER")
+	password := mustGetEnv("DB_PASSWORD")
+	name := mustGetEnv("DB_NAME")
+
+	log.Printf("Connecting to MySQL as user=%s db=%s host=%s port=%s", user, name, host, port)
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, name)
 
@@ -178,6 +188,18 @@ func connectDB() error {
 	return db.Ping()
 }
 
+// mustGetEnv returns the value of an environment variable or fatally exits.
+// No fallback — the variable must be set in .env or the process environment.
+func mustGetEnv(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("FATAL: required environment variable %s is not set. Check your .env file.", key)
+	}
+	return val
+}
+
+// getEnv returns the value of an environment variable with a fallback default.
+// Use only for non-sensitive, optional config (e.g. PORT, ALLOWED_ORIGINS).
 func getEnv(key, fallback string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
@@ -279,14 +301,42 @@ func updateLeaseStatuses() {
 // MIDDLEWARE
 // ============================================================================
 
+var allowedOrigins []string
+
+func initAllowedOrigins() {
+	defaults := "http://localhost:3000,http://localhost:3001,http://34.227.145.219:3001,https://seanscoolprojectmmis6191.com"
+	raw := getEnv("ALLOWED_ORIGINS", defaults)
+	for _, o := range strings.Split(raw, ",") {
+		if trimmed := strings.TrimSpace(o); trimmed != "" {
+			allowedOrigins = append(allowedOrigins, trimmed)
+		}
+	}
+}
+
+func isOriginAllowed(origin string) bool {
+	for _, o := range allowedOrigins {
+		if o == origin {
+			return true
+		}
+	}
+	return false
+}
+
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+
+		if origin != "" && isOriginAllowed(origin) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+		}
+
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Max-Age", "86400")
 
 		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 

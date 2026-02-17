@@ -13,12 +13,13 @@ export interface Property {
   bedrooms: number
   bathrooms: number
   squareFeet?: number | null
-  yearBuilt?: number | null
   monthlyRent: number
-  securityDeposit?: number | null
+  depositAmount?: number | null
   available: boolean
+  availableDate?: string | null
   description?: string | null
   amenities?: string[]
+  imageUrl?: string | null
   createdAt?: string
   updatedAt?: string
 }
@@ -34,9 +35,8 @@ export interface PropertyCreate {
   bedrooms: number
   bathrooms: number
   squareFeet?: number | null
-  yearBuilt?: number | null
   monthlyRent: number
-  securityDeposit?: number | null
+  depositAmount?: number | null
   available: boolean
   description?: string | null
   amenities?: string[]
@@ -70,8 +70,9 @@ export interface Lease {
   startDate: string
   endDate: string
   monthlyRent: number
-  securityDeposit?: number | null
+  depositAmount?: number | null
   status: LeaseStatus
+  paymentDueDay?: number
   createdAt?: string
   updatedAt?: string
   // Joined fields for display
@@ -85,7 +86,7 @@ export interface LeaseCreate {
   startDate: string
   endDate: string
   monthlyRent: number
-  securityDeposit?: number | null
+  depositAmount?: number | null
   status?: LeaseStatus
 }
 

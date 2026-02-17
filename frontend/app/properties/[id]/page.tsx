@@ -152,14 +152,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                   <div className="text-sm text-gray-500 dark:text-gray-400">Sq Ft</div>
                 </div>
               )}
-              {property.yearBuilt && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {property.yearBuilt}
-                  </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Year Built</div>
-                </div>
-              )}
             </div>
 
             {/* Description */}
@@ -204,11 +196,11 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 <div className="text-gray-500 dark:text-gray-400">per month</div>
               </div>
 
-              {property.securityDeposit && (
+              {property.depositAmount && (
                 <div className="flex justify-between py-3 border-t border-gray-100 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Security Deposit</span>
+                  <span className="text-gray-600 dark:text-gray-400">Deposit Amount</span>
                   <span className="font-medium text-gray-900 dark:text-white">
-                    {formatCurrency(property.securityDeposit)}
+                    {formatCurrency(property.depositAmount)}
                   </span>
                 </div>
               )}
