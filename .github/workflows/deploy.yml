@@ -60,7 +60,7 @@ jobs:
 
             # --- Frontend ---
             cd ~/roses-clovers-properties/frontend
-            npm ci --omit=dev
+            npm ci
 
             # Stop old PM2 apps from previous project name
             pm2 delete jones-county-xc 2>/dev/null || true
