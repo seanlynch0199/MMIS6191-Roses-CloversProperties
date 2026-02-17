@@ -26,8 +26,6 @@ jobs:
 
       - name: Build Next.js
         working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_URL: http://${{ secrets.LIGHTSAIL_HOST }}:8080
         run: npm run build
 
       - name: Setup SSH key
