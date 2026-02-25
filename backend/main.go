@@ -86,11 +86,15 @@ type Lease struct {
 }
 
 type DashboardStats struct {
-	TotalProperties     int `json:"totalProperties"`
-	AvailableProperties int `json:"availableProperties"`
-	TotalTenants        int `json:"totalTenants"`
-	ActiveLeases        int `json:"activeLeases"`
-	UpcomingLeases      int `json:"upcomingLeases"`
+	TotalProperties     int     `json:"totalProperties"`
+	AvailableProperties int     `json:"availableProperties"`
+	TotalTenants        int     `json:"totalTenants"`
+	ActiveLeases        int     `json:"activeLeases"`
+	UpcomingLeases      int     `json:"upcomingLeases"`
+	// TotalLeases is the count of all leases regardless of status.
+	TotalLeases int `json:"totalLeases"`
+	// MonthlyRevenue is the sum of monthly_rent for active leases only.
+	MonthlyRevenue float64 `json:"monthlyRevenue"`
 }
 
 type LoginRequest struct {
@@ -443,6 +447,9 @@ func adminDashboardStatsHandler(w http.ResponseWriter, r *http.Request) {
 	db.QueryRow("SELECT COUNT(*) FROM tenants").Scan(&stats.TotalTenants)
 	db.QueryRow("SELECT COUNT(*) FROM leases WHERE status = 'active'").Scan(&stats.ActiveLeases)
 	db.QueryRow("SELECT COUNT(*) FROM leases WHERE status = 'upcoming'").Scan(&stats.UpcomingLeases)
+	db.QueryRow("SELECT COUNT(*) FROM leases").Scan(&stats.TotalLeases)
+	// Monthly revenue = sum of monthly_rent for active leases only
+	db.QueryRow("SELECT COALESCE(SUM(monthly_rent), 0) FROM leases WHERE status = 'active'").Scan(&stats.MonthlyRevenue)
 
 	jsonResponse(w, stats, http.StatusOK)
 }

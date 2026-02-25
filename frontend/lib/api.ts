@@ -199,6 +199,26 @@ export async function deleteTenant(id: number): Promise<void> {
 }
 
 // ============================================================================
+// ADMIN DASHBOARD STATS (auth required)
+// ============================================================================
+
+export interface DashboardStats {
+  totalProperties: number
+  availableProperties: number
+  totalTenants: number
+  activeLeases: number
+  upcomingLeases: number
+  /** Total lease count across all statuses */
+  totalLeases: number
+  /** Sum of monthly_rent for all active leases */
+  monthlyRevenue: number
+}
+
+export async function fetchDashboardStats(): Promise<DashboardStats> {
+  return authFetch<DashboardStats>('/api/admin/dashboard/stats')
+}
+
+// ============================================================================
 // ADMIN LEASES (auth required)
 // ============================================================================
 

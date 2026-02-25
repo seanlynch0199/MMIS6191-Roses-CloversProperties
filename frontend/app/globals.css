@@ -2,34 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   DESIGN TOKENS — light mode defaults
+   Components use Tailwind classes directly; these vars are for custom CSS only.
+   ============================================================================ */
 :root {
-  --color-primary: #16a34a;
-  --color-secondary: #e11d48;
-  --color-bg: #ffffff;
-  --color-bg-alt: #f8fafc;
-  --color-card: #ffffff;
-  --color-text: #1e293b;
-  --color-text-muted: #64748b;
-  --color-border: #e2e8f0;
+  --color-primary: #16a34a;       /* clover-600 */
+  --color-secondary: #e11d48;     /* rose-600 */
+
+  /* Surface hierarchy */
+  --color-bg: #f8fafc;            /* slate-50 — subtle off-white page bg */
+  --color-bg-alt: #f1f5f9;        /* slate-100 — section/stripe bg */
+  --color-card: #ffffff;          /* pure white for cards */
+
+  /* Text */
+  --color-text: #0f172a;          /* slate-950 — strong heading contrast */
+  --color-text-muted: #64748b;    /* slate-500 — secondary / helper text */
+
+  /* Borders */
+  --color-border: #e2e8f0;        /* slate-200 */
 }
 
+/* Dark mode overrides */
 .dark {
   --color-primary: #4ade80;
   --color-secondary: #fb7185;
+
   --color-bg: #0f172a;
   --color-bg-alt: #1e293b;
   --color-card: #1e293b;
+
   --color-text: #f1f5f9;
   --color-text-muted: #94a3b8;
+
   --color-border: #334155;
 }
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Print styles */
+/* Readable placeholder text in light and dark mode */
+::placeholder {
+  color: #94a3b8; /* slate-400 */
+}
+.dark ::placeholder {
+  color: #475569; /* slate-600 */
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
 @media print {
   .no-print {
     display: none !important;
@@ -58,7 +89,10 @@ body {
   }
 }
 
-/* Scrollbar styling */
+/* ============================================================================
+   SCROLLBAR
+   ============================================================================ */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -77,7 +111,10 @@ body {
   background: var(--color-text-muted);
 }
 
-/* Hero background pattern */
+/* ============================================================================
+   HERO BACKGROUND PATTERN
+   ============================================================================ */
+
 .hero-pattern {
   background-image:
     radial-gradient(circle at 25px 25px, rgba(255,255,255,0.1) 2px, transparent 0),
@@ -85,19 +122,26 @@ body {
   background-size: 100px 100px;
 }
 
-/* Smooth transitions for dark mode */
+/* ============================================================================
+   TRANSITIONS
+   ============================================================================ */
+
 * {
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }
 
-/* Form input focus states */
+/* ============================================================================
+   FORM FOCUS STATES
+   ============================================================================ */
+
 input:focus, select:focus, textarea:focus {
   outline: none;
-  ring: 2px;
-  ring-offset: 2px;
 }
 
-/* Status badge styles */
+/* ============================================================================
+   STATUS BADGE STYLES (used by lease status chips)
+   ============================================================================ */
+
 .status-active {
   @apply bg-clover-100 text-clover-800 dark:bg-clover-900/30 dark:text-clover-400;
 }
@@ -107,7 +151,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .status-ended {
-  @apply bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400;
+  @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400;
 }
 
 .status-terminated {
