@@ -14,7 +14,7 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+    <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -96,7 +96,7 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
           <p className="text-center text-sm text-gray-500 dark:text-gray-400">
             &copy; {currentYear} {siteConfig.name}. All rights reserved.
           </p>

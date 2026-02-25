@@ -49,17 +49,17 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Logo className="w-10 h-10" />
             <div className="hidden sm:block">
-              <span className="font-bold text-lg text-gray-900 dark:text-white">
+              <span className="font-bold text-lg text-slate-900 dark:text-white">
                 Roses & Clovers
               </span>
-              <span className="block text-xs text-gray-500 dark:text-gray-400 -mt-1">
+              <span className="block text-xs text-slate-500 dark:text-slate-400 -mt-1">
                 Properties
               </span>
             </div>
@@ -75,7 +75,7 @@ export function SiteHeader() {
                   'px-4 py-2 text-sm font-medium rounded-md transition-colors',
                   pathname === item.href
                     ? 'text-clover-600 dark:text-clover-400 bg-clover-50 dark:bg-clover-900/20'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-clover-600 dark:hover:text-clover-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-clover-600 dark:hover:text-clover-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 )}
               >
                 {item.label}
@@ -96,7 +96,7 @@ export function SiteHeader() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -114,7 +114,7 @@ export function SiteHeader() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="md:hidden py-4 border-t border-slate-200 dark:border-slate-800">
             {navigation.map((item) => (
               <Link
                 key={item.href}
@@ -124,7 +124,7 @@ export function SiteHeader() {
                   'block px-4 py-2 text-sm font-medium rounded-md transition-colors',
                   pathname === item.href
                     ? 'text-clover-600 dark:text-clover-400 bg-clover-50 dark:bg-clover-900/20'
-                    : 'text-gray-700 dark:text-gray-300'
+                    : 'text-slate-700 dark:text-slate-300'
                 )}
               >
                 {item.label}

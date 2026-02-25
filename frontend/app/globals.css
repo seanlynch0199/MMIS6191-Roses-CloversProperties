@@ -11,9 +11,9 @@
   --color-secondary: #e11d48;     /* rose-600 */
 
   /* Surface hierarchy */
-  --color-bg: #f8fafc;            /* slate-50 — subtle off-white page bg */
-  --color-bg-alt: #f1f5f9;        /* slate-100 — section/stripe bg */
-  --color-card: #ffffff;          /* pure white for cards */
+  --color-bg: #f1f5f9;            /* slate-100 — visible gray page bg */
+  --color-bg-alt: #e2e8f0;        /* slate-200 — striped sections */
+  --color-card: #ffffff;          /* pure white for cards / elevated panels */
 
   /* Text */
   --color-text: #0f172a;          /* slate-950 — strong heading contrast */
@@ -43,7 +43,7 @@
    ============================================================================ */
 
 body {
-  background-color: var(--color-bg);
+  background-color: var(--color-bg); /* slate-100 light / slate-900 dark */
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

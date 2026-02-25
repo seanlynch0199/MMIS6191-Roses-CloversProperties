@@ -34,7 +34,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4" />
@@ -71,7 +71,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Breadcrumb */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex items-center gap-2 text-sm">
             <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-clover-600 dark:hover:text-clover-400">
@@ -128,7 +128,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
 
             {/* Features Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center border border-slate-200 dark:border-slate-700">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {property.bedrooms === 0 ? 'Studio' : property.bedrooms}
                 </div>
@@ -136,7 +136,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                   {property.bedrooms === 0 ? '' : property.bedrooms === 1 ? 'Bedroom' : 'Bedrooms'}
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center border border-slate-200 dark:border-slate-700">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {property.bathrooms}
                 </div>
@@ -145,7 +145,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 </div>
               </div>
               {property.squareFeet && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center border border-slate-200 dark:border-slate-700">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     {property.squareFeet.toLocaleString()}
                   </div>
@@ -188,7 +188,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 sticky top-24">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 sticky top-24 shadow-sm">
               <div className="text-center mb-6">
                 <div className="text-3xl font-bold text-clover-600 dark:text-clover-400">
                   {formatCurrency(property.monthlyRent)}

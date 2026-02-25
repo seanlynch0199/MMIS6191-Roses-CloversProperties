@@ -50,14 +50,14 @@ export default function HomePage() {
           <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              className="fill-white dark:fill-gray-900"
+              className="fill-white dark:fill-slate-900"
             />
           </svg>
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 bg-white dark:bg-gray-900">
+      <section className="py-16 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -79,7 +79,7 @@ export default function HomePage() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-xl h-80 animate-pulse" />
+                <div key={i} className="bg-slate-200 dark:bg-slate-800 rounded-xl h-80 animate-pulse" />
               ))}
             </div>
           ) : featuredProperties.length > 0 ? (
@@ -89,7 +89,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl">
+            <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
               <p className="text-gray-500 dark:text-gray-400">
                 No available properties at the moment. Check back soon!
               </p>
@@ -99,7 +99,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-800">
+      <section className="py-16 bg-slate-100 dark:bg-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
             Why Choose Roses & Clovers?
