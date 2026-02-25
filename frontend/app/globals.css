@@ -113,13 +113,21 @@ body {
 
 /* ============================================================================
    HERO BACKGROUND PATTERN
+   Subtle dot grid — toned way down in dark mode to avoid distraction.
    ============================================================================ */
 
 .hero-pattern {
   background-image:
-    radial-gradient(circle at 25px 25px, rgba(255,255,255,0.1) 2px, transparent 0),
-    radial-gradient(circle at 75px 75px, rgba(255,255,255,0.05) 2px, transparent 0);
+    radial-gradient(circle at 25px 25px, rgba(255,255,255,0.12) 2px, transparent 0),
+    radial-gradient(circle at 75px 75px, rgba(255,255,255,0.06) 2px, transparent 0);
   background-size: 100px 100px;
+}
+
+/* Dark mode: nearly invisible — just a very faint texture */
+.dark .hero-pattern {
+  background-image:
+    radial-gradient(circle at 25px 25px, rgba(255,255,255,0.03) 2px, transparent 0),
+    radial-gradient(circle at 75px 75px, rgba(255,255,255,0.015) 2px, transparent 0);
 }
 
 /* ============================================================================

@@ -9,12 +9,12 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Hero */}
       <section className="bg-gradient-to-br from-clover-600 to-clover-800 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-bold text-white mb-4">About Us</h1>
-          <p className="text-xl text-clover-100">
+          <p className="text-xl text-white/90">
             Your trusted partner in finding the perfect home
           </p>
         </div>
@@ -28,12 +28,12 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Our Story
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               {siteConfig.name} was founded with a simple mission: to provide quality rental properties
               with exceptional service. We believe that finding a home should be a joyful experience,
               not a stressful one.
             </p>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               Our team is dedicated to maintaining each property to the highest standards, ensuring
               that every tenant enjoys a comfortable, safe, and welcoming living environment. We take
               pride in our responsive service and genuine care for our community.
@@ -51,7 +51,7 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Integrity</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-slate-600 dark:text-slate-400 text-sm">
                   We believe in honest, transparent communication and fair dealings with all our tenants.
                 </p>
               </div>
@@ -63,7 +63,7 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Care</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-slate-600 dark:text-slate-400 text-sm">
                   We treat every tenant like family and every property like our own home.
                 </p>
               </div>
@@ -75,7 +75,7 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Responsiveness</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-slate-600 dark:text-slate-400 text-sm">
                   Quick response to maintenance requests and tenant needs is our priority.
                 </p>
               </div>
@@ -87,7 +87,7 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Quality</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-slate-600 dark:text-slate-400 text-sm">
                   We maintain high standards for all our properties, ensuring comfort and safety.
                 </p>
               </div>
@@ -96,7 +96,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-6">
               Get In Touch
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               Whether you are looking for your next home or have questions about our properties,
               we would love to hear from you. Our team is always ready to help.
             </p>
@@ -112,7 +112,7 @@ export default function AboutPage() {
             </Link>
             <Link
               href="/contact"
-              className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="px-6 py-3 border border-slate-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 font-semibold rounded-lg hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
             >
               Contact Us
             </Link>

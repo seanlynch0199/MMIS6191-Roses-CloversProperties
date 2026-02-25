@@ -23,10 +23,10 @@ export default function HomePage() {
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
               {siteConfig.name}
             </h1>
-            <p className="text-xl md:text-2xl text-clover-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
               {siteConfig.tagline}
             </p>
-            <p className="text-lg text-clover-200 mb-8 max-w-xl mx-auto">
+            <p className="text-lg text-white/75 mb-8 max-w-xl mx-auto">
               {siteConfig.description}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
@@ -64,7 +64,7 @@ export default function HomePage() {
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 Featured Properties
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Discover our available rentals
               </p>
             </div>
@@ -90,7 +90,7 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-slate-500 dark:text-slate-400">
                 No available properties at the moment. Check back soon!
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-16 bg-slate-100 dark:bg-slate-800">
+      <section className="py-16 bg-slate-50 dark:bg-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
             Why Choose Roses & Clovers?
@@ -112,7 +112,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Quality Properties</h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 Every property is carefully maintained and updated to ensure your comfort and satisfaction.
               </p>
             </div>
@@ -123,7 +123,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Personal Touch</h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 We treat every tenant like family, providing responsive service and genuine care.
               </p>
             </div>
@@ -134,7 +134,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Trusted Service</h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 Transparent policies, fair pricing, and honest communication you can count on.
               </p>
             </div>

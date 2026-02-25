@@ -26,7 +26,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Hero */}
       <section className="bg-gradient-to-br from-rose-500 to-rose-600 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -44,7 +44,7 @@ export default function ContactPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Get In Touch
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
+            <p className="text-slate-600 dark:text-slate-400 mb-8">
               Have questions about our properties or services? Looking for your next home?
               Reach out to us and we will get back to you as soon as possible.
             </p>
@@ -60,7 +60,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-gray-900 dark:text-white">Phone</h3>
                   <a
                     href={`tel:${siteConfig.contact.phone}`}
-                    className="text-gray-600 dark:text-gray-400 hover:text-clover-600 dark:hover:text-clover-400"
+                    className="text-slate-600 dark:text-slate-400 hover:text-clover-600 dark:hover:text-clover-400"
                   >
                     {siteConfig.contact.phone}
                   </a>
@@ -77,7 +77,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-gray-900 dark:text-white">Email</h3>
                   <a
                     href={`mailto:${siteConfig.contact.email}`}
-                    className="text-gray-600 dark:text-gray-400 hover:text-clover-600 dark:hover:text-clover-400"
+                    className="text-slate-600 dark:text-slate-400 hover:text-clover-600 dark:hover:text-clover-400"
                   >
                     {siteConfig.contact.email}
                   </a>
@@ -93,7 +93,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Address</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-slate-400">
                     {siteConfig.contact.address}
                   </p>
                 </div>
@@ -102,7 +102,7 @@ export default function ContactPage() {
 
             <div className="mt-10 p-6 bg-clover-50 dark:bg-clover-900/20 rounded-xl">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Office Hours</h3>
-              <div className="space-y-1 text-gray-600 dark:text-gray-400">
+              <div className="space-y-1 text-slate-600 dark:text-slate-400">
                 <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
                 <p>Saturday: 10:00 AM - 2:00 PM</p>
                 <p>Sunday: Closed</p>
@@ -126,7 +126,7 @@ export default function ContactPage() {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Message Sent!
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
                   Thank you for reaching out. We will get back to you shortly.
                 </p>
                 <button
@@ -139,7 +139,7 @@ export default function ContactPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Name *
                   </label>
                   <input
@@ -154,7 +154,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Email *
                   </label>
                   <input
@@ -169,7 +169,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Phone
                   </label>
                   <input
@@ -183,7 +183,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="message" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Message *
                   </label>
                   <textarea
@@ -192,7 +192,7 @@ export default function ContactPage() {
                     rows={5}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent resize-none"
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent resize-none"
                     placeholder="Tell us what you're looking for..."
                   />
                 </div>

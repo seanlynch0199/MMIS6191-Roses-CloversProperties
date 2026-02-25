@@ -47,14 +47,14 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
       <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Browse Properties
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             Find your perfect rental home from our available properties
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function PropertiesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Search
               </label>
               <div className="flex gap-2">
@@ -76,7 +76,7 @@ export default function PropertiesPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="Search by name, address, city..."
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
                 />
                 <button
                   onClick={handleSearch}
@@ -89,7 +89,7 @@ export default function PropertiesPage() {
 
             {/* Property Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Type
               </label>
               <select
@@ -105,7 +105,7 @@ export default function PropertiesPage() {
 
             {/* Bedrooms */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Bedrooms
               </label>
               <select
@@ -121,7 +121,7 @@ export default function PropertiesPage() {
 
             {/* Availability Toggle */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Availability
               </label>
               <select
@@ -145,7 +145,7 @@ export default function PropertiesPage() {
           <div className="mt-4 flex justify-end">
             <button
               onClick={clearFilters}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-clover-600 dark:hover:text-clover-400"
+              className="text-sm text-slate-600 dark:text-slate-400 hover:text-clover-600 dark:hover:text-clover-400"
             >
               Clear all filters
             </button>
@@ -161,7 +161,7 @@ export default function PropertiesPage() {
           </div>
         ) : properties && properties.length > 0 ? (
           <>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               Showing {properties.length} {properties.length === 1 ? 'property' : 'properties'}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -178,7 +178,7 @@ export default function PropertiesPage() {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No properties found
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-slate-500 dark:text-slate-400 mb-4">
               Try adjusting your filters or check back later for new listings.
             </p>
             <button
