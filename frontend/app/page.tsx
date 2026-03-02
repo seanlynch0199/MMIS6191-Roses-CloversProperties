@@ -50,14 +50,14 @@ export default function HomePage() {
           <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="#f5f5f4"
+              fill="#e7e5e4"
             />
           </svg>
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 bg-white border-b border-stone-200">
+      <section className="py-16 bg-stone-200 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -79,7 +79,7 @@ export default function HomePage() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-stone-200 rounded-xl h-80 animate-pulse" />
+                <div key={i} className="bg-stone-300 rounded-xl h-64 animate-pulse" />
               ))}
             </div>
           ) : featuredProperties.length > 0 ? (
@@ -99,7 +99,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-16 bg-stone-100 border-b border-stone-200">
+      <section className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-stone-900 text-center mb-12">
             Why Choose Roses &amp; Clovers?
