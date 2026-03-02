@@ -24,38 +24,28 @@ export function PropertyCard({ property, showStatus = true }: PropertyCardProps)
       href={`/properties/${property.id}`}
       className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:border-clover-300"
     >
-      {/* Image placeholder */}
-      <div className="relative h-48 bg-gradient-to-br from-stone-100 to-stone-200">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="w-16 h-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-        </div>
-        {showStatus && (
-          <div className="absolute top-3 right-3">
-            {property.available ? (
-              <span className="px-2 py-1 text-xs font-medium bg-clover-500 text-white rounded-full">
+      {/* Content */}
+      <div className="p-5">
+        {/* Top row: name + status badge */}
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <h3 className="font-semibold text-stone-900 group-hover:text-clover-600 transition-colors">
+            {property.name}
+          </h3>
+          {showStatus && (
+            property.available ? (
+              <span className="flex-shrink-0 px-2 py-0.5 text-xs font-medium bg-clover-100 text-clover-700 rounded-full">
                 Available
               </span>
             ) : (
-              <span className="px-2 py-1 text-xs font-medium bg-stone-500 text-white rounded-full">
+              <span className="flex-shrink-0 px-2 py-0.5 text-xs font-medium bg-stone-100 text-stone-600 rounded-full">
                 Leased
               </span>
-            )}
-          </div>
-        )}
-        <div className="absolute bottom-3 left-3">
-          <span className="px-2 py-1 text-xs font-medium bg-white/90 text-stone-700 rounded-full">
-            {formatPropertyType(property.propertyType)}
-          </span>
+            )
+          )}
         </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-stone-900 group-hover:text-clover-600 transition-colors">
-          {property.name}
-        </h3>
+        <p className="text-xs font-medium text-wood-600 mb-1 uppercase tracking-wide">
+          {formatPropertyType(property.propertyType)}
+        </p>
         <p className="text-sm text-stone-500 mt-1">
           {property.addressLine1}, {property.city}
         </p>

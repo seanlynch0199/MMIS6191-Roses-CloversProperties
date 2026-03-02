@@ -57,14 +57,14 @@ export default function HomePage() {
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 bg-stone-100">
+      <section className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold text-stone-900">
                 Featured Properties
               </h2>
-              <p className="text-stone-500 mt-1">
+              <p className="text-stone-600 mt-1">
                 Discover our available rentals
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-stone-100 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-stone-900 text-center mb-12">
             Why Choose Roses &amp; Clovers?

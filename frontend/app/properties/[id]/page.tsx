@@ -88,31 +88,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Image Placeholder */}
-        <div className="relative h-64 md:h-96 bg-gradient-to-br from-stone-100 to-stone-200 rounded-xl mb-8 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg className="w-24 h-24 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          </div>
-          <div className="absolute top-4 right-4">
-            {property.available ? (
-              <span className="px-3 py-1 text-sm font-medium bg-clover-500 text-white rounded-full">
-                Available
-              </span>
-            ) : (
-              <span className="px-3 py-1 text-sm font-medium bg-stone-500 text-white rounded-full">
-                Leased
-              </span>
-            )}
-          </div>
-          <div className="absolute bottom-4 left-4">
-            <span className="px-3 py-1 text-sm font-medium bg-white/90 text-stone-700 rounded-full">
-              {formatPropertyType(property.propertyType)}
-            </span>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
