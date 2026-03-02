@@ -17,22 +17,22 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-clover-600 to-clover-800 hero-pattern overflow-hidden">
+      <section className="relative bg-stone-50 border-b-4 border-clover-600 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+            <h1 className="text-4xl md:text-6xl font-bold text-stone-900 mb-4">
               {siteConfig.name}
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-clover-700 font-medium mb-6 max-w-2xl mx-auto">
               {siteConfig.tagline}
             </p>
-            <p className="text-lg text-white/75 mb-8 max-w-xl mx-auto">
+            <p className="text-lg text-stone-600 mb-8 max-w-xl mx-auto">
               {siteConfig.description}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/properties"
-                className="px-8 py-3 bg-white text-clover-700 font-semibold rounded-lg hover:bg-clover-50 transition-colors shadow-lg"
+                className="px-8 py-3 bg-clover-600 text-white font-semibold rounded-lg hover:bg-clover-700 transition-colors shadow-lg"
               >
                 Browse Properties
               </Link>
@@ -44,15 +44,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-        </div>
-        {/* Decorative wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="#e7e5e4"
-            />
-          </svg>
         </div>
       </section>
 
