@@ -47,14 +47,14 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-stone-100">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+      <div className="bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-stone-900">
             Browse Properties
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">
+          <p className="mt-2 text-stone-500">
             Find your perfect rental home from our available properties
           </p>
         </div>
@@ -62,11 +62,11 @@ export default function PropertiesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 mb-8 border border-slate-200 dark:border-slate-700">
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-8 border border-stone-200">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-stone-700 mb-1">
                 Search
               </label>
               <div className="flex gap-2">
@@ -76,7 +76,7 @@ export default function PropertiesPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="Search by name, address, city..."
-                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
                 />
                 <button
                   onClick={handleSearch}
@@ -89,13 +89,13 @@ export default function PropertiesPage() {
 
             {/* Property Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-stone-700 mb-1">
                 Type
               </label>
               <select
                 value={filters.type || ''}
                 onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
               >
                 {propertyTypes.map(type => (
                   <option key={type.value} value={type.value}>{type.label}</option>
@@ -105,13 +105,13 @@ export default function PropertiesPage() {
 
             {/* Bedrooms */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-stone-700 mb-1">
                 Bedrooms
               </label>
               <select
                 value={filters.beds || 0}
                 onChange={(e) => handleFilterChange('beds', parseInt(e.target.value) || undefined)}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
               >
                 {bedroomOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -121,7 +121,7 @@ export default function PropertiesPage() {
 
             {/* Availability Toggle */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-stone-700 mb-1">
                 Availability
               </label>
               <select
@@ -133,7 +133,7 @@ export default function PropertiesPage() {
                     handleFilterChange('available', undefined)
                   }
                 }}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
               >
                 <option value="available">Available Only</option>
                 <option value="all">All Properties</option>
@@ -145,7 +145,7 @@ export default function PropertiesPage() {
           <div className="mt-4 flex justify-end">
             <button
               onClick={clearFilters}
-              className="text-sm text-slate-600 dark:text-slate-400 hover:text-clover-600 dark:hover:text-clover-400"
+              className="text-sm text-stone-500 hover:text-clover-600 transition-colors"
             >
               Clear all filters
             </button>
@@ -156,12 +156,12 @@ export default function PropertiesPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-slate-200 dark:bg-slate-800 rounded-xl h-80 animate-pulse" />
+              <div key={i} className="bg-stone-200 rounded-xl h-80 animate-pulse" />
             ))}
           </div>
         ) : properties && properties.length > 0 ? (
           <>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-sm text-stone-500 mb-4">
               Showing {properties.length} {properties.length === 1 ? 'property' : 'properties'}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -171,19 +171,19 @@ export default function PropertiesPage() {
             </div>
           </>
         ) : (
-          <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-            <svg className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-stone-200">
+            <svg className="w-16 h-16 mx-auto text-stone-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-medium text-stone-900 mb-2">
               No properties found
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-4">
+            <p className="text-stone-500 mb-4">
               Try adjusting your filters or check back later for new listings.
             </p>
             <button
               onClick={clearFilters}
-              className="text-clover-600 dark:text-clover-400 hover:underline font-medium"
+              className="text-clover-600 hover:underline font-medium"
             >
               Clear all filters
             </button>

@@ -22,12 +22,12 @@ export function PropertyCard({ property, showStatus = true }: PropertyCardProps)
   return (
     <Link
       href={`/properties/${property.id}`}
-      className="group block bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:border-clover-300 dark:hover:border-clover-600"
+      className="group block bg-white rounded-xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:border-clover-300"
     >
       {/* Image placeholder */}
-      <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800">
+      <div className="relative h-48 bg-gradient-to-br from-stone-100 to-stone-200">
         <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="w-16 h-16 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-16 h-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
         </div>
@@ -38,14 +38,14 @@ export function PropertyCard({ property, showStatus = true }: PropertyCardProps)
                 Available
               </span>
             ) : (
-              <span className="px-2 py-1 text-xs font-medium bg-gray-500 text-white rounded-full">
+              <span className="px-2 py-1 text-xs font-medium bg-stone-500 text-white rounded-full">
                 Leased
               </span>
             )}
           </div>
         )}
         <div className="absolute bottom-3 left-3">
-          <span className="px-2 py-1 text-xs font-medium bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 rounded-full">
+          <span className="px-2 py-1 text-xs font-medium bg-white/90 text-stone-700 rounded-full">
             {formatPropertyType(property.propertyType)}
           </span>
         </div>
@@ -53,15 +53,15 @@ export function PropertyCard({ property, showStatus = true }: PropertyCardProps)
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-clover-600 dark:group-hover:text-clover-400 transition-colors">
+        <h3 className="font-semibold text-stone-900 group-hover:text-clover-600 transition-colors">
           {property.name}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-stone-500 mt-1">
           {property.addressLine1}, {property.city}
         </p>
 
         {/* Features */}
-        <div className="flex items-center gap-4 mt-3 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-4 mt-3 text-sm text-stone-600">
           <span className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -85,11 +85,11 @@ export function PropertyCard({ property, showStatus = true }: PropertyCardProps)
         </div>
 
         {/* Price */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-          <span className="text-2xl font-bold text-clover-600 dark:text-clover-400">
+        <div className="mt-4 pt-4 border-t border-stone-100">
+          <span className="text-2xl font-bold text-clover-600">
             {formatCurrency(property.monthlyRent)}
           </span>
-          <span className="text-gray-500 dark:text-gray-400">/month</span>
+          <span className="text-stone-500">/month</span>
         </div>
       </div>
     </Link>

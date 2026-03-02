@@ -3,39 +3,24 @@
 @tailwind utilities;
 
 /* ============================================================================
-   DESIGN TOKENS — light mode defaults
-   Components use Tailwind classes directly; these vars are for custom CSS only.
+   DESIGN TOKENS
    ============================================================================ */
 :root {
   --color-primary: #16a34a;       /* clover-600 */
   --color-secondary: #e11d48;     /* rose-600 */
+  --color-wood: #8a5511;          /* wood-600 */
 
   /* Surface hierarchy */
-  --color-bg: #f1f5f9;            /* slate-100 — visible gray page bg */
-  --color-bg-alt: #e2e8f0;        /* slate-200 — striped sections */
+  --color-bg: #f5f5f4;            /* stone-100 — warm page bg */
+  --color-bg-alt: #e7e5e4;        /* stone-200 — alternate sections */
   --color-card: #ffffff;          /* pure white for cards / elevated panels */
 
   /* Text */
-  --color-text: #0f172a;          /* slate-950 — strong heading contrast */
-  --color-text-muted: #64748b;    /* slate-500 — secondary / helper text */
+  --color-text: #1c1917;          /* stone-900 — strong heading contrast */
+  --color-text-muted: #78716c;    /* stone-500 — secondary / helper text */
 
   /* Borders */
-  --color-border: #e2e8f0;        /* slate-200 */
-}
-
-/* Dark mode overrides */
-.dark {
-  --color-primary: #4ade80;
-  --color-secondary: #fb7185;
-
-  --color-bg: #0f172a;
-  --color-bg-alt: #1e293b;
-  --color-card: #1e293b;
-
-  --color-text: #f1f5f9;
-  --color-text-muted: #94a3b8;
-
-  --color-border: #334155;
+  --color-border: #e7e5e4;        /* stone-200 */
 }
 
 /* ============================================================================
@@ -43,18 +28,14 @@
    ============================================================================ */
 
 body {
-  background-color: var(--color-bg); /* slate-100 light / slate-900 dark */
+  background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Readable placeholder text in light and dark mode */
 ::placeholder {
-  color: #94a3b8; /* slate-400 */
-}
-.dark ::placeholder {
-  color: #475569; /* slate-600 */
+  color: #a8a29e; /* stone-400 */
 }
 
 /* ============================================================================
@@ -103,7 +84,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: #a8a29e; /* stone-400 */
   border-radius: 4px;
 }
 
@@ -113,7 +94,6 @@ body {
 
 /* ============================================================================
    HERO BACKGROUND PATTERN
-   Subtle dot grid — toned way down in dark mode to avoid distraction.
    ============================================================================ */
 
 .hero-pattern {
@@ -121,13 +101,6 @@ body {
     radial-gradient(circle at 25px 25px, rgba(255,255,255,0.12) 2px, transparent 0),
     radial-gradient(circle at 75px 75px, rgba(255,255,255,0.06) 2px, transparent 0);
   background-size: 100px 100px;
-}
-
-/* Dark mode: nearly invisible — just a very faint texture */
-.dark .hero-pattern {
-  background-image:
-    radial-gradient(circle at 25px 25px, rgba(255,255,255,0.03) 2px, transparent 0),
-    radial-gradient(circle at 75px 75px, rgba(255,255,255,0.015) 2px, transparent 0);
 }
 
 /* ============================================================================
@@ -151,17 +124,17 @@ input:focus, select:focus, textarea:focus {
    ============================================================================ */
 
 .status-active {
-  @apply bg-clover-100 text-clover-800 dark:bg-clover-900/30 dark:text-clover-400;
+  @apply bg-clover-100 text-clover-800;
 }
 
 .status-upcoming {
-  @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+  @apply bg-blue-100 text-blue-800;
 }
 
 .status-ended {
-  @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400;
+  @apply bg-stone-100 text-stone-700;
 }
 
 .status-terminated {
-  @apply bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400;
+  @apply bg-rose-100 text-rose-800;
 }

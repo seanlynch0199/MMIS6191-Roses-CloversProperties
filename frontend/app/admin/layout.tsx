@@ -46,15 +46,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Wait for auth check before rendering protected content
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-slate-500 dark:text-slate-400">Loading...</div>
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+        <div className="text-stone-500">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div className="min-h-screen bg-stone-100">
+      <header className="bg-stone-800 border-b-2 border-wood-500 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <circle cx="30" cy="28" r="5" className="fill-rose-500" />
                   <circle cx="34" cy="24" r="3" className="fill-rose-400" />
                 </svg>
-                <span className="font-bold text-gray-900 dark:text-white hidden sm:block">
+                <span className="font-bold text-white hidden sm:block">
                   Admin Portal
                 </span>
               </Link>
@@ -79,8 +79,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     href={item.href}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       isActive(item)
-                        ? 'text-clover-600 dark:text-clover-400 bg-clover-50 dark:bg-clover-900/20'
-                        : 'text-slate-700 dark:text-slate-300 hover:text-clover-600 dark:hover:text-clover-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'text-clover-400 bg-stone-700'
+                        : 'text-stone-300 hover:text-clover-400 hover:bg-stone-700'
                     }`}
                   >
                     {item.label}
@@ -92,13 +92,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-4">
               <Link
                 href="/"
-                className="text-sm text-slate-600 dark:text-slate-400 hover:text-clover-600 dark:hover:text-clover-400"
+                className="text-sm text-stone-400 hover:text-clover-400 transition-colors"
               >
                 Back to Site
               </Link>
               <button
                 onClick={handleLogout}
-                className="text-sm text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
+                className="text-sm text-stone-400 hover:text-rose-400 transition-colors"
               >
                 Logout
               </button>
@@ -108,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </header>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+      <div className="md:hidden bg-stone-800 border-b border-stone-700">
         <div className="flex overflow-x-auto px-4 py-2 gap-2">
           {navItems.map((item) => (
             <Link
@@ -116,8 +116,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href={item.href}
               className={`px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap ${
                 isActive(item)
-                  ? 'text-clover-600 dark:text-clover-400 bg-clover-50 dark:bg-clover-900/20'
-                  : 'text-gray-700 dark:text-slate-300'
+                  ? 'text-clover-400 bg-stone-700'
+                  : 'text-stone-300 hover:text-clover-400'
               }`}
             >
               {item.label}

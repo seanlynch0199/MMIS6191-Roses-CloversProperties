@@ -6,10 +6,10 @@ import { fetchLeases, fetchAdminProperties, fetchTenants, createLease, updateLea
 import { Lease, LeaseCreate, Property, Tenant } from '@/data/types'
 
 const statusColors: Record<string, string> = {
-  upcoming: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-  active: 'bg-clover-100 dark:bg-clover-900/30 text-clover-700 dark:text-clover-300',
-  ended: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300',
-  terminated: 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
+  upcoming:   'bg-blue-100 text-blue-700',
+  active:     'bg-clover-100 text-clover-700',
+  ended:      'bg-stone-100 text-stone-700',
+  terminated: 'bg-rose-100 text-rose-700',
 }
 
 export default function AdminLeasesPage() {
@@ -109,17 +109,17 @@ export default function AdminLeasesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Leases</h1>
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
+      <h1 className="text-2xl font-bold text-stone-900 mb-6">Leases</h1>
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-stone-200">
+        <div className="px-6 py-4 border-b border-stone-200 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <p className="text-sm text-gray-500 dark:text-slate-400">
+            <p className="text-sm text-stone-500">
               {leases?.length || 0} {(leases?.length || 0) === 1 ? 'lease' : 'leases'}
             </p>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+              className="px-3 py-1.5 text-sm border border-stone-300 rounded-lg bg-white text-stone-900"
             >
               <option value="">All Statuses</option>
               <option value="upcoming">Upcoming</option>
@@ -137,48 +137,48 @@ export default function AdminLeasesPage() {
         </div>
 
         {(error || isError) && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error || (queryError instanceof Error ? queryError.message : 'Failed to load leases')}
           </div>
         )}
 
         {isLoading ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400">
+          <div className="p-8 text-center text-stone-500">
             Loading leases...
           </div>
         ) : !leases?.length ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-700 m-6 rounded-lg">
+          <div className="p-8 text-center text-stone-500 border-2 border-dashed border-stone-200 m-6 rounded-lg">
             No leases found. Click &quot;Add Lease&quot; to create one.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50 dark:bg-slate-900/50">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Property</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tenant</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Dates</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Rent</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                <tr className="bg-stone-50">
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Property</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Tenant</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Dates</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Rent</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+              <tbody className="divide-y divide-stone-200">
                 {leases.map((lease) => (
-                  <tr key={lease.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                  <tr key={lease.id} className="hover:bg-stone-50">
                     <td className="py-3 px-6">
-                      <div className="font-medium text-slate-900 dark:text-slate-100">
+                      <div className="font-medium text-stone-900">
                         {lease.propertyName || `Property #${lease.propertyId}`}
                       </div>
                     </td>
-                    <td className="py-3 px-6 text-gray-600 dark:text-slate-400">
+                    <td className="py-3 px-6 text-stone-600">
                       {lease.tenantName || `Tenant #${lease.tenantId}`}
                     </td>
-                    <td className="py-3 px-6 text-gray-600 dark:text-slate-400">
+                    <td className="py-3 px-6 text-stone-600">
                       <div>{formatDate(lease.startDate)}</div>
-                      <div className="text-xs text-gray-400">to {formatDate(lease.endDate)}</div>
+                      <div className="text-xs text-stone-400">to {formatDate(lease.endDate)}</div>
                     </td>
-                    <td className="py-3 px-6 text-slate-900 dark:text-slate-100 font-medium">
+                    <td className="py-3 px-6 text-stone-900 font-medium">
                       {formatCurrency(lease.monthlyRent)}
                     </td>
                     <td className="py-3 px-6">
@@ -190,13 +190,13 @@ export default function AdminLeasesPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(lease)}
-                          className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(lease.id)}
-                          className="px-3 py-1 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded transition-colors"
                         >
                           Delete
                         </button>
@@ -229,18 +229,18 @@ export default function AdminLeasesPage() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
+            <h3 className="text-lg font-semibold text-stone-900 mb-2">
               Confirm Delete
             </h3>
-            <p className="text-gray-600 dark:text-slate-400 mb-6">
+            <p className="text-stone-600 mb-6">
               Are you sure you want to delete this lease? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteMutation.isPending}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -284,24 +284,22 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
     onSave(formData)
   }
 
-  // Get selected property rent as default
   const selectedProperty = properties.find(p => p.id === formData.propertyId)
+
+  const inputClass = "w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+  const labelClass = "block text-sm font-medium text-stone-700 mb-1"
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-lg w-full p-6">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
+      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-stone-200">
+        <h3 className="text-lg font-semibold text-stone-900 mb-6">
           {lease ? 'Edit Lease' : 'Add Lease'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Property *
-            </label>
-            <select
-              required
-              value={formData.propertyId}
+            <label className={labelClass}>Property *</label>
+            <select required value={formData.propertyId}
               onChange={(e) => {
                 const propId = parseInt(e.target.value)
                 const prop = properties.find(p => p.id === propId)
@@ -312,8 +310,7 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
                   depositAmount: formData.depositAmount || prop?.depositAmount,
                 })
               }}
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-            >
+              className={inputClass}>
               {properties.map(prop => (
                 <option key={prop.id} value={prop.id}>
                   {prop.name} - {prop.city} ({prop.available ? 'Available' : 'Leased'})
@@ -323,15 +320,10 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Tenant *
-            </label>
-            <select
-              required
-              value={formData.tenantId}
+            <label className={labelClass}>Tenant *</label>
+            <select required value={formData.tenantId}
               onChange={(e) => setFormData({ ...formData, tenantId: parseInt(e.target.value) })}
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-            >
+              className={inputClass}>
               {tenants.map(tenant => (
                 <option key={tenant.id} value={tenant.id}>
                   {tenant.firstName} {tenant.lastName} ({tenant.email})
@@ -342,70 +334,41 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Start Date *
-              </label>
-              <input
-                type="date"
-                required
-                value={formData.startDate}
+              <label className={labelClass}>Start Date *</label>
+              <input type="date" required value={formData.startDate}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                End Date *
-              </label>
-              <input
-                type="date"
-                required
-                value={formData.endDate}
+              <label className={labelClass}>End Date *</label>
+              <input type="date" required value={formData.endDate}
                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Monthly Rent *
-              </label>
-              <input
-                type="number"
-                required
-                min={0}
-                value={formData.monthlyRent}
+              <label className={labelClass}>Monthly Rent *</label>
+              <input type="number" required min={0} value={formData.monthlyRent}
                 onChange={(e) => setFormData({ ...formData, monthlyRent: parseInt(e.target.value) || 0 })}
                 placeholder={selectedProperty ? `Default: $${selectedProperty.monthlyRent}` : ''}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Deposit Amount
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={formData.depositAmount || ''}
+              <label className={labelClass}>Deposit Amount</label>
+              <input type="number" min={0} value={formData.depositAmount || ''}
                 onChange={(e) => setFormData({ ...formData, depositAmount: parseInt(e.target.value) || undefined })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
           </div>
 
           {lease && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Status
-              </label>
-              <select
-                value={formData.status}
+              <label className={labelClass}>Status</label>
+              <select value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as LeaseCreate['status'] })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              >
+                className={inputClass}>
                 <option value="upcoming">Upcoming</option>
                 <option value="active">Active</option>
                 <option value="ended">Ended</option>
@@ -414,20 +377,13 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
+            <button type="button" onClick={onClose} disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-clover-600 hover:bg-clover-700 rounded-lg transition-colors disabled:opacity-50"
-            >
+            <button type="submit" disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-clover-600 hover:bg-clover-700 rounded-lg transition-colors disabled:opacity-50">
               {isLoading ? 'Saving...' : lease ? 'Update Lease' : 'Add Lease'}
             </button>
           </div>

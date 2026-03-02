@@ -6,6 +6,7 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // dark: classes compile but never activate — no .dark class is ever added to <html>
   darkMode: 'class',
   theme: {
     extend: {
@@ -37,6 +38,20 @@ const config: Config = {
           800: '#9f1239',
           900: '#881337',
           950: '#4c0519',
+        },
+        // Wood - Warm brown accent
+        wood: {
+          50:  '#fdf8f0',
+          100: '#f5e5c0',
+          200: '#e8c87a',
+          300: '#d4a84e',
+          400: '#bf8a2e',
+          500: '#a56e18',
+          600: '#8a5511',
+          700: '#6f400d',
+          800: '#572f0a',
+          900: '#3d1f06',
+          950: '#1e0d02',
         },
       },
     },

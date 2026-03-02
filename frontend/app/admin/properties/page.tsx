@@ -80,11 +80,11 @@ export default function AdminPropertiesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Properties</h1>
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
+      <h1 className="text-2xl font-bold text-stone-900 mb-6">Properties</h1>
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-stone-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <p className="text-sm text-gray-500 dark:text-slate-400">
+        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+          <p className="text-sm text-stone-500">
             {properties?.length || 0} {(properties?.length || 0) === 1 ? 'property' : 'properties'}
           </p>
           <button
@@ -96,53 +96,53 @@ export default function AdminPropertiesPage() {
         </div>
 
         {(error || isError) && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error || (queryError instanceof Error ? queryError.message : 'Failed to load properties')}
           </div>
         )}
 
         {isLoading ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400">
+          <div className="p-8 text-center text-stone-500">
             Loading properties...
           </div>
         ) : !properties?.length ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-700 m-6 rounded-lg">
+          <div className="p-8 text-center text-stone-500 border-2 border-dashed border-stone-200 m-6 rounded-lg">
             No properties found. Click &quot;Add Property&quot; to create one.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50 dark:bg-slate-900/50">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Property</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Beds/Baths</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Rent</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                <tr className="bg-stone-50">
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Property</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Type</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Beds/Baths</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Rent</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+              <tbody className="divide-y divide-stone-200">
                 {properties.map((property) => (
-                  <tr key={property.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                  <tr key={property.id} className="hover:bg-stone-50">
                     <td className="py-3 px-6">
-                      <div className="font-medium text-slate-900 dark:text-slate-100">{property.name}</div>
-                      <div className="text-sm text-gray-500 dark:text-slate-400">{property.city}, {property.state}</div>
+                      <div className="font-medium text-stone-900">{property.name}</div>
+                      <div className="text-sm text-stone-500">{property.city}, {property.state}</div>
                     </td>
-                    <td className="py-3 px-6 text-gray-600 dark:text-slate-400 capitalize">
+                    <td className="py-3 px-6 text-stone-600 capitalize">
                       {property.propertyType}
                     </td>
-                    <td className="py-3 px-6 text-gray-600 dark:text-slate-400">
+                    <td className="py-3 px-6 text-stone-600">
                       {property.bedrooms === 0 ? 'Studio' : `${property.bedrooms} bed`} / {property.bathrooms} bath
                     </td>
-                    <td className="py-3 px-6 text-slate-900 dark:text-slate-100 font-medium">
+                    <td className="py-3 px-6 text-stone-900 font-medium">
                       {formatCurrency(property.monthlyRent)}
                     </td>
                     <td className="py-3 px-6">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                         property.available
-                          ? 'bg-clover-100 dark:bg-clover-900/30 text-clover-700 dark:text-clover-300'
-                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300'
+                          ? 'bg-clover-100 text-clover-700'
+                          : 'bg-stone-100 text-stone-700'
                       }`}>
                         {property.available ? 'Available' : 'Leased'}
                       </span>
@@ -151,13 +151,13 @@ export default function AdminPropertiesPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(property)}
-                          className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(property.id)}
-                          className="px-3 py-1 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded transition-colors"
                         >
                           Delete
                         </button>
@@ -188,18 +188,18 @@ export default function AdminPropertiesPage() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
+            <h3 className="text-lg font-semibold text-stone-900 mb-2">
               Confirm Delete
             </h3>
-            <p className="text-gray-600 dark:text-slate-400 mb-6">
+            <p className="text-stone-600 mb-6">
               Are you sure you want to delete this property? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteMutation.isPending}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -268,104 +268,66 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
     })
   }
 
+  const inputClass = "w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+  const labelClass = "block text-sm font-medium text-stone-700 mb-1"
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full p-6 my-8">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
+      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 my-8 border border-stone-200">
+        <h3 className="text-lg font-semibold text-stone-900 mb-6">
           {property ? 'Edit Property' : 'Add Property'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Property Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
+              <label className={labelClass}>Property Name *</label>
+              <input type="text" required value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Address Line 1 *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.addressLine1}
+              <label className={labelClass}>Address Line 1 *</label>
+              <input type="text" required value={formData.addressLine1}
                 onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Address Line 2
-              </label>
-              <input
-                type="text"
-                value={formData.addressLine2 || ''}
+              <label className={labelClass}>Address Line 2</label>
+              <input type="text" value={formData.addressLine2 || ''}
                 onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                City *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.city}
+              <label className={labelClass}>City *</label>
+              <input type="text" required value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  State *
-                </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={2}
-                  value={formData.state}
+                <label className={labelClass}>State *</label>
+                <input type="text" required maxLength={2} value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
-                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-                />
+                  className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  ZIP *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.zip}
+                <label className={labelClass}>ZIP *</label>
+                <input type="text" required value={formData.zip}
                   onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-                />
+                  className={inputClass} />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Property Type *
-              </label>
-              <select
-                required
-                value={formData.propertyType}
+              <label className={labelClass}>Property Type *</label>
+              <select required value={formData.propertyType}
                 onChange={(e) => setFormData({ ...formData, propertyType: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              >
+                className={inputClass}>
                 {propertyTypes.map(type => (
                   <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
                 ))}
@@ -374,121 +336,67 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  Bedrooms *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min={0}
-                  value={formData.bedrooms}
+                <label className={labelClass}>Bedrooms *</label>
+                <input type="number" required min={0} value={formData.bedrooms}
                   onChange={(e) => setFormData({ ...formData, bedrooms: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-                />
+                  className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  Bathrooms *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min={1}
-                  step={0.5}
-                  value={formData.bathrooms}
+                <label className={labelClass}>Bathrooms *</label>
+                <input type="number" required min={1} step={0.5} value={formData.bathrooms}
                   onChange={(e) => setFormData({ ...formData, bathrooms: parseFloat(e.target.value) || 1 })}
-                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-                />
+                  className={inputClass} />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Square Feet
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={formData.squareFeet || ''}
+              <label className={labelClass}>Square Feet</label>
+              <input type="number" min={0} value={formData.squareFeet || ''}
                 onChange={(e) => setFormData({ ...formData, squareFeet: parseInt(e.target.value) || undefined })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Monthly Rent *
-              </label>
-              <input
-                type="number"
-                required
-                min={0}
-                value={formData.monthlyRent}
+              <label className={labelClass}>Monthly Rent *</label>
+              <input type="number" required min={0} value={formData.monthlyRent}
                 onChange={(e) => setFormData({ ...formData, monthlyRent: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Deposit Amount
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={formData.depositAmount || ''}
+              <label className={labelClass}>Deposit Amount</label>
+              <input type="number" min={0} value={formData.depositAmount || ''}
                 onChange={(e) => setFormData({ ...formData, depositAmount: parseInt(e.target.value) || undefined })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Description
-              </label>
-              <textarea
-                rows={3}
-                value={formData.description || ''}
+              <label className={labelClass}>Description</label>
+              <textarea rows={3} value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent resize-none"
-              />
+                className={`${inputClass} resize-none`} />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Amenities
-              </label>
+              <label className={labelClass}>Amenities</label>
               <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={amenityInput}
+                <input type="text" value={amenityInput}
                   onChange={(e) => setAmenityInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAmenity())}
                   placeholder="Add amenity..."
-                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={addAmenity}
-                  className="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
-                >
+                  className={inputClass} />
+                <button type="button" onClick={addAmenity}
+                  className="px-4 py-2 bg-stone-100 text-stone-700 rounded-lg hover:bg-stone-200 transition-colors">
                   Add
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.amenities?.map((amenity) => (
-                  <span
-                    key={amenity}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-clover-50 dark:bg-clover-900/30 text-clover-700 dark:text-clover-300 rounded-full text-sm"
-                  >
+                  <span key={amenity}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-clover-50 text-clover-700 rounded-full text-sm">
                     {amenity}
-                    <button
-                      type="button"
-                      onClick={() => removeAmenity(amenity)}
-                      className="hover:text-clover-900 dark:hover:text-clover-100"
-                    >
-                      &times;
-                    </button>
+                    <button type="button" onClick={() => removeAmenity(amenity)}
+                      className="hover:text-clover-900">&times;</button>
                   </span>
                 ))}
               </div>
@@ -496,33 +404,21 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
 
             <div className="md:col-span-2">
               <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.available}
+                <input type="checkbox" checked={formData.available}
                   onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
-                  className="w-4 h-4 text-clover-600 border-slate-300 rounded focus:ring-clover-500"
-                />
-                <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                  Available for rent
-                </span>
+                  className="w-4 h-4 text-clover-600 border-stone-300 rounded focus:ring-clover-500" />
+                <span className="text-sm font-medium text-stone-700">Available for rent</span>
               </label>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
+            <button type="button" onClick={onClose} disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-clover-600 hover:bg-clover-700 rounded-lg transition-colors disabled:opacity-50"
-            >
+            <button type="submit" disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-clover-600 hover:bg-clover-700 rounded-lg transition-colors disabled:opacity-50">
               {isLoading ? 'Saving...' : property ? 'Update Property' : 'Add Property'}
             </button>
           </div>

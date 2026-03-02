@@ -1,5 +1,4 @@
 export { SiteHeader } from './SiteHeader'
 export { SiteFooter } from './SiteFooter'
-export { DarkModeToggle } from './DarkModeToggle'
 export { Breadcrumbs } from './Breadcrumbs'
 export { PropertyCard } from './PropertyCard'

@@ -32,8 +32,8 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-slate-900 flex items-center justify-center px-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg max-w-sm w-full p-8">
+    <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4">
+      <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-8 border border-stone-200">
         <div className="text-center mb-8">
           <svg className="w-12 h-12 mx-auto mb-4" viewBox="0 0 40 40" fill="none">
             <circle cx="14" cy="12" r="6" className="fill-clover-500" />
@@ -43,21 +43,21 @@ export default function AdminLoginPage() {
             <circle cx="30" cy="28" r="5" className="fill-rose-500" />
             <circle cx="34" cy="24" r="3" className="fill-rose-400" />
           </svg>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Admin Login</h1>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+          <h1 className="text-xl font-bold text-stone-900">Admin Login</h1>
+          <p className="text-sm text-stone-500 mt-1">
             Roses &amp; Clovers Properties
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 mb-1">
               Password
             </label>
             <input
@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-clover-500 focus:border-transparent"
               placeholder="Enter admin password"
             />
           </div>

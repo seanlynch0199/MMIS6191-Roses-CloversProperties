@@ -70,10 +70,10 @@ export default function AdminTenantsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Tenants</h1>
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <p className="text-sm text-gray-500 dark:text-slate-400">
+      <h1 className="text-2xl font-bold text-stone-900 mb-6">Tenants</h1>
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-stone-200">
+        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+          <p className="text-sm text-stone-500">
             {tenants?.length || 0} {(tenants?.length || 0) === 1 ? 'tenant' : 'tenants'}
           </p>
           <button
@@ -85,55 +85,55 @@ export default function AdminTenantsPage() {
         </div>
 
         {(error || isError) && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error || (queryError instanceof Error ? queryError.message : 'Failed to load tenants')}
           </div>
         )}
 
         {isLoading ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400">
+          <div className="p-8 text-center text-stone-500">
             Loading tenants...
           </div>
         ) : !tenants?.length ? (
-          <div className="p-8 text-center text-gray-500 dark:text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-700 m-6 rounded-lg">
+          <div className="p-8 text-center text-stone-500 border-2 border-dashed border-stone-200 m-6 rounded-lg">
             No tenants found. Click &quot;Add Tenant&quot; to create one.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50 dark:bg-slate-900/50">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Name</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Phone</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                <tr className="bg-stone-50">
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Name</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Email</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Phone</th>
+                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+              <tbody className="divide-y divide-stone-200">
                 {tenants.map((tenant) => (
-                  <tr key={tenant.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                  <tr key={tenant.id} className="hover:bg-stone-50">
                     <td className="py-3 px-6">
-                      <div className="font-medium text-slate-900 dark:text-slate-100">
+                      <div className="font-medium text-stone-900">
                         {tenant.firstName} {tenant.lastName}
                       </div>
                     </td>
-                    <td className="py-3 px-6 text-gray-600 dark:text-slate-400">
+                    <td className="py-3 px-6 text-stone-600">
                       {tenant.email}
                     </td>
-                    <td className="py-3 px-6 text-gray-600 dark:text-slate-400">
+                    <td className="py-3 px-6 text-stone-600">
                       {tenant.phone || '-'}
                     </td>
                     <td className="py-3 px-6">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(tenant)}
-                          className="px-3 py-1 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(tenant.id)}
-                          className="px-3 py-1 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors"
+                          className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded transition-colors"
                         >
                           Delete
                         </button>
@@ -164,18 +164,18 @@ export default function AdminTenantsPage() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
+            <h3 className="text-lg font-semibold text-stone-900 mb-2">
               Confirm Delete
             </h3>
-            <p className="text-gray-600 dark:text-slate-400 mb-6">
+            <p className="text-stone-600 mb-6">
               Are you sure you want to delete this tenant? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteMutation.isPending}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -214,80 +214,53 @@ function TenantModal({ tenant, onSave, onClose, isLoading }: TenantModalProps) {
     onSave(formData)
   }
 
+  const inputClass = "w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+  const labelClass = "block text-sm font-medium text-stone-700 mb-1"
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
+        <h3 className="text-lg font-semibold text-stone-900 mb-6">
           {tenant ? 'Edit Tenant' : 'Add Tenant'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                First Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.firstName}
+              <label className={labelClass}>First Name *</label>
+              <input type="text" required value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Last Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.lastName}
+              <label className={labelClass}>Last Name *</label>
+              <input type="text" required value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-              />
+                className={inputClass} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              required
-              value={formData.email}
+            <label className={labelClass}>Email *</label>
+            <input type="email" required value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-            />
+              className={inputClass} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Phone
-            </label>
-            <input
-              type="tel"
-              value={formData.phone || ''}
+            <label className={labelClass}>Phone</label>
+            <input type="tel" value={formData.phone || ''}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-            />
+              className={inputClass} />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
+            <button type="button" onClick={onClose} disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors disabled:opacity-50"
-            >
+            <button type="submit" disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors disabled:opacity-50">
               {isLoading ? 'Saving...' : tenant ? 'Update Tenant' : 'Add Tenant'}
             </button>
           </div>
