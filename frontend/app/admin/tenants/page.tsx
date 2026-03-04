@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchTenants, createTenant, updateTenant, deleteTenant } from '@/lib/api'
 import { Tenant, TenantCreate } from '@/data/types'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 
 export default function AdminTenantsPage() {
   const queryClient = useQueryClient()
@@ -60,6 +61,8 @@ export default function AdminTenantsPage() {
     setIsModalOpen(true)
   }
 
+  useEscapeKey(() => setDeleteConfirm(null), !!deleteConfirm)
+
   function handleSubmit(data: TenantCreate) {
     if (editingTenant) {
       updateMutation.mutate({ id: editingTenant.id, data })
@@ -85,7 +88,7 @@ export default function AdminTenantsPage() {
         </div>
 
         {(error || isError) && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div role="alert" className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error || (queryError instanceof Error ? queryError.message : 'Failed to load tenants')}
           </div>
         )}
@@ -103,10 +106,10 @@ export default function AdminTenantsPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-stone-50">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Name</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Email</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Phone</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Name</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Email</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Phone</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200">
@@ -127,12 +130,14 @@ export default function AdminTenantsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(tenant)}
+                          aria-label={`Edit ${tenant.firstName} ${tenant.lastName}`}
                           className="px-3 py-1 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(tenant.id)}
+                          aria-label={`Delete ${tenant.firstName} ${tenant.lastName}`}
                           className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded transition-colors"
                         >
                           Delete
@@ -163,9 +168,14 @@ export default function AdminTenantsPage() {
 
       {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-tenant-title"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        >
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
-            <h3 className="text-lg font-semibold text-stone-900 mb-2">
+            <h3 id="delete-tenant-title" className="text-lg font-semibold text-stone-900 mb-2">
               Confirm Delete
             </h3>
             <p className="text-stone-600 mb-6">
@@ -173,6 +183,7 @@ export default function AdminTenantsPage() {
             </p>
             <div className="flex justify-end gap-3">
               <button
+                autoFocus
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
@@ -184,7 +195,7 @@ export default function AdminTenantsPage() {
                 disabled={deleteMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
               >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Tenant'}
               </button>
             </div>
           </div>
@@ -209,6 +220,8 @@ function TenantModal({ tenant, onSave, onClose, isLoading }: TenantModalProps) {
     phone: tenant?.phone || '',
   })
 
+  useEscapeKey(onClose)
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     onSave(formData)
@@ -218,38 +231,43 @@ function TenantModal({ tenant, onSave, onClose, isLoading }: TenantModalProps) {
   const labelClass = "block text-sm font-medium text-stone-700 mb-1"
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tenant-modal-title"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+    >
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
-        <h3 className="text-lg font-semibold text-stone-900 mb-6">
+        <h3 id="tenant-modal-title" className="text-lg font-semibold text-stone-900 mb-6">
           {tenant ? 'Edit Tenant' : 'Add Tenant'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>First Name *</label>
-              <input type="text" required value={formData.firstName}
+              <label htmlFor="tenant-firstname" className={labelClass}>First Name *</label>
+              <input id="tenant-firstname" type="text" required autoFocus value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Last Name *</label>
-              <input type="text" required value={formData.lastName}
+              <label htmlFor="tenant-lastname" className={labelClass}>Last Name *</label>
+              <input id="tenant-lastname" type="text" required value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 className={inputClass} />
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>Email *</label>
-            <input type="email" required value={formData.email}
+            <label htmlFor="tenant-email" className={labelClass}>Email *</label>
+            <input id="tenant-email" type="email" required value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>Phone</label>
-            <input type="tel" value={formData.phone || ''}
+            <label htmlFor="tenant-phone" className={labelClass}>Phone</label>
+            <input id="tenant-phone" type="tel" value={formData.phone || ''}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className={inputClass} />
           </div>

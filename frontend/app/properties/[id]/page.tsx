@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { fetchProperty } from '@/lib/api'
 import { siteConfig } from '@/data/site'
+import { formatCurrency } from '@/lib/format'
 
 interface PropertyDetailPageProps {
   params: Promise<{ id: string }>
@@ -19,14 +20,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     queryFn: () => fetchProperty(propertyId),
     enabled: !isNaN(propertyId),
   })
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
 
   const formatPropertyType = (type: string) => {
     return type.charAt(0).toUpperCase() + type.slice(1)

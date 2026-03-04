@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchAdminProperties, createProperty, updateProperty, deleteProperty } from '@/lib/api'
 import { Property, PropertyCreate } from '@/data/types'
+import { formatCurrency } from '@/lib/format'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 
 const propertyTypes = ['apartment', 'house', 'duplex', 'condo', 'townhouse', 'studio']
 
@@ -70,13 +72,7 @@ export default function AdminPropertiesPage() {
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
+  useEscapeKey(() => setDeleteConfirm(null), !!deleteConfirm)
 
   return (
     <div>
@@ -96,7 +92,7 @@ export default function AdminPropertiesPage() {
         </div>
 
         {(error || isError) && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div role="alert" className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error || (queryError instanceof Error ? queryError.message : 'Failed to load properties')}
           </div>
         )}
@@ -114,12 +110,12 @@ export default function AdminPropertiesPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-stone-50">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Property</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Type</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Beds/Baths</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Rent</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Property</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Type</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Beds/Baths</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Rent</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200">
@@ -151,12 +147,14 @@ export default function AdminPropertiesPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(property)}
+                          aria-label={`Edit ${property.name}`}
                           className="px-3 py-1 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(property.id)}
+                          aria-label={`Delete ${property.name}`}
                           className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded transition-colors"
                         >
                           Delete
@@ -187,9 +185,14 @@ export default function AdminPropertiesPage() {
 
       {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-property-title"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        >
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
-            <h3 className="text-lg font-semibold text-stone-900 mb-2">
+            <h3 id="delete-property-title" className="text-lg font-semibold text-stone-900 mb-2">
               Confirm Delete
             </h3>
             <p className="text-stone-600 mb-6">
@@ -197,6 +200,7 @@ export default function AdminPropertiesPage() {
             </p>
             <div className="flex justify-end gap-3">
               <button
+                autoFocus
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
@@ -208,7 +212,7 @@ export default function AdminPropertiesPage() {
                 disabled={deleteMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
               >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Property'}
               </button>
             </div>
           </div>
@@ -246,6 +250,8 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
 
   const [amenityInput, setAmenityInput] = useState('')
 
+  useEscapeKey(onClose)
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     onSave(formData)
@@ -272,60 +278,65 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
   const labelClass = "block text-sm font-medium text-stone-700 mb-1"
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="property-modal-title"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto"
+    >
       <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 my-8 border border-stone-200">
-        <h3 className="text-lg font-semibold text-stone-900 mb-6">
+        <h3 id="property-modal-title" className="text-lg font-semibold text-stone-900 mb-6">
           {property ? 'Edit Property' : 'Add Property'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className={labelClass}>Property Name *</label>
-              <input type="text" required value={formData.name}
+              <label htmlFor="prop-name" className={labelClass}>Property Name *</label>
+              <input id="prop-name" type="text" required autoFocus value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>Address Line 1 *</label>
-              <input type="text" required value={formData.addressLine1}
+              <label htmlFor="prop-address1" className={labelClass}>Address Line 1 *</label>
+              <input id="prop-address1" type="text" required value={formData.addressLine1}
                 onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
                 className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>Address Line 2</label>
-              <input type="text" value={formData.addressLine2 || ''}
+              <label htmlFor="prop-address2" className={labelClass}>Address Line 2</label>
+              <input id="prop-address2" type="text" value={formData.addressLine2 || ''}
                 onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
                 className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>City *</label>
-              <input type="text" required value={formData.city}
+              <label htmlFor="prop-city" className={labelClass}>City *</label>
+              <input id="prop-city" type="text" required value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                 className={inputClass} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>State *</label>
-                <input type="text" required maxLength={2} value={formData.state}
+                <label htmlFor="prop-state" className={labelClass}>State *</label>
+                <input id="prop-state" type="text" required maxLength={2} value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
                   className={inputClass} />
               </div>
               <div>
-                <label className={labelClass}>ZIP *</label>
-                <input type="text" required value={formData.zip}
+                <label htmlFor="prop-zip" className={labelClass}>ZIP *</label>
+                <input id="prop-zip" type="text" required value={formData.zip}
                   onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
                   className={inputClass} />
               </div>
             </div>
 
             <div>
-              <label className={labelClass}>Property Type *</label>
-              <select required value={formData.propertyType}
+              <label htmlFor="prop-type" className={labelClass}>Property Type *</label>
+              <select id="prop-type" required value={formData.propertyType}
                 onChange={(e) => setFormData({ ...formData, propertyType: e.target.value })}
                 className={inputClass}>
                 {propertyTypes.map(type => (
@@ -336,54 +347,54 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Bedrooms *</label>
-                <input type="number" required min={0} value={formData.bedrooms}
+                <label htmlFor="prop-bedrooms" className={labelClass}>Bedrooms *</label>
+                <input id="prop-bedrooms" type="number" required min={0} value={formData.bedrooms}
                   onChange={(e) => setFormData({ ...formData, bedrooms: parseInt(e.target.value) || 0 })}
                   className={inputClass} />
               </div>
               <div>
-                <label className={labelClass}>Bathrooms *</label>
-                <input type="number" required min={1} step={0.5} value={formData.bathrooms}
+                <label htmlFor="prop-bathrooms" className={labelClass}>Bathrooms *</label>
+                <input id="prop-bathrooms" type="number" required min={1} step={0.5} value={formData.bathrooms}
                   onChange={(e) => setFormData({ ...formData, bathrooms: parseFloat(e.target.value) || 1 })}
                   className={inputClass} />
               </div>
             </div>
 
             <div>
-              <label className={labelClass}>Square Feet</label>
-              <input type="number" min={0} value={formData.squareFeet || ''}
+              <label htmlFor="prop-sqft" className={labelClass}>Square Feet</label>
+              <input id="prop-sqft" type="number" min={0} value={formData.squareFeet || ''}
                 onChange={(e) => setFormData({ ...formData, squareFeet: parseInt(e.target.value) || undefined })}
                 className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Monthly Rent *</label>
-              <input type="number" required min={0} value={formData.monthlyRent}
+              <label htmlFor="prop-rent" className={labelClass}>Monthly Rent *</label>
+              <input id="prop-rent" type="number" required min={0} value={formData.monthlyRent}
                 onChange={(e) => setFormData({ ...formData, monthlyRent: parseInt(e.target.value) || 0 })}
                 className={inputClass} />
             </div>
 
             <div>
-              <label className={labelClass}>Deposit Amount</label>
-              <input type="number" min={0} value={formData.depositAmount || ''}
+              <label htmlFor="prop-deposit" className={labelClass}>Deposit Amount</label>
+              <input id="prop-deposit" type="number" min={0} value={formData.depositAmount || ''}
                 onChange={(e) => setFormData({ ...formData, depositAmount: parseInt(e.target.value) || undefined })}
                 className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>Description</label>
-              <textarea rows={3} value={formData.description || ''}
+              <label htmlFor="prop-desc" className={labelClass}>Description</label>
+              <textarea id="prop-desc" rows={3} value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className={`${inputClass} resize-none`} />
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>Amenities</label>
+              <label htmlFor="prop-amenity" className={labelClass}>Amenities</label>
               <div className="flex gap-2 mb-2">
-                <input type="text" value={amenityInput}
+                <input id="prop-amenity" type="text" value={amenityInput}
                   onChange={(e) => setAmenityInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAmenity())}
-                  placeholder="Add amenity..."
+                  placeholder="Type an amenity and press Enter or Add"
                   className={inputClass} />
                 <button type="button" onClick={addAmenity}
                   className="px-4 py-2 bg-stone-100 text-stone-700 rounded-lg hover:bg-stone-200 transition-colors">
@@ -395,8 +406,12 @@ function PropertyModal({ property, onSave, onClose, isLoading }: PropertyModalPr
                   <span key={amenity}
                     className="inline-flex items-center gap-1 px-3 py-1 bg-clover-50 text-clover-700 rounded-full text-sm">
                     {amenity}
-                    <button type="button" onClick={() => removeAmenity(amenity)}
-                      className="hover:text-clover-900">&times;</button>
+                    <button
+                      type="button"
+                      onClick={() => removeAmenity(amenity)}
+                      aria-label={`Remove ${amenity}`}
+                      className="hover:text-clover-900"
+                    >&times;</button>
                   </span>
                 ))}
               </div>

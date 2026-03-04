@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchLeases, fetchAdminProperties, fetchTenants, createLease, updateLease, deleteLease } from '@/lib/api'
 import { Lease, LeaseCreate, Property, Tenant } from '@/data/types'
+import { formatCurrency } from '@/lib/format'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 
 const statusColors: Record<string, string> = {
   upcoming:   'bg-blue-100 text-blue-700',
@@ -83,6 +85,8 @@ export default function AdminLeasesPage() {
     setIsModalOpen(true)
   }
 
+  useEscapeKey(() => setDeleteConfirm(null), !!deleteConfirm)
+
   function handleSubmit(data: LeaseCreate) {
     if (editingLease) {
       updateMutation.mutate({ id: editingLease.id, data })
@@ -99,14 +103,6 @@ export default function AdminLeasesPage() {
     })
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
-
   return (
     <div>
       <h1 className="text-2xl font-bold text-stone-900 mb-6">Leases</h1>
@@ -116,7 +112,9 @@ export default function AdminLeasesPage() {
             <p className="text-sm text-stone-500">
               {leases?.length || 0} {(leases?.length || 0) === 1 ? 'lease' : 'leases'}
             </p>
+            <label htmlFor="lease-status-filter" className="sr-only">Filter by status</label>
             <select
+              id="lease-status-filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-1.5 text-sm border border-stone-300 rounded-lg bg-white text-stone-900"
@@ -137,7 +135,7 @@ export default function AdminLeasesPage() {
         </div>
 
         {(error || isError) && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div role="alert" className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error || (queryError instanceof Error ? queryError.message : 'Failed to load leases')}
           </div>
         )}
@@ -155,12 +153,12 @@ export default function AdminLeasesPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-stone-50">
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Property</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Tenant</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Dates</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Rent</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Property</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Tenant</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Dates</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Rent</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="text-left py-3 px-6 text-xs font-semibold text-stone-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200">
@@ -190,12 +188,14 @@ export default function AdminLeasesPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(lease)}
+                          aria-label={`Edit lease for ${lease.propertyName || `Property #${lease.propertyId}`}`}
                           className="px-3 py-1 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(lease.id)}
+                          aria-label={`Delete lease for ${lease.propertyName || `Property #${lease.propertyId}`}`}
                           className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded transition-colors"
                         >
                           Delete
@@ -228,9 +228,14 @@ export default function AdminLeasesPage() {
 
       {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-lease-title"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        >
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-stone-200">
-            <h3 className="text-lg font-semibold text-stone-900 mb-2">
+            <h3 id="delete-lease-title" className="text-lg font-semibold text-stone-900 mb-2">
               Confirm Delete
             </h3>
             <p className="text-stone-600 mb-6">
@@ -238,6 +243,7 @@ export default function AdminLeasesPage() {
             </p>
             <div className="flex justify-end gap-3">
               <button
+                autoFocus
                 onClick={() => setDeleteConfirm(null)}
                 disabled={deleteMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50"
@@ -249,7 +255,7 @@ export default function AdminLeasesPage() {
                 disabled={deleteMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
               >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Lease'}
               </button>
             </div>
           </div>
@@ -279,6 +285,8 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
     status: lease?.status || 'upcoming',
   })
 
+  useEscapeKey(onClose)
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     onSave(formData)
@@ -290,16 +298,21 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
   const labelClass = "block text-sm font-medium text-stone-700 mb-1"
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lease-modal-title"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+    >
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-stone-200">
-        <h3 className="text-lg font-semibold text-stone-900 mb-6">
+        <h3 id="lease-modal-title" className="text-lg font-semibold text-stone-900 mb-6">
           {lease ? 'Edit Lease' : 'Add Lease'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className={labelClass}>Property *</label>
-            <select required value={formData.propertyId}
+            <label htmlFor="lease-property" className={labelClass}>Property *</label>
+            <select id="lease-property" required autoFocus value={formData.propertyId}
               onChange={(e) => {
                 const propId = parseInt(e.target.value)
                 const prop = properties.find(p => p.id === propId)
@@ -320,8 +333,8 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
           </div>
 
           <div>
-            <label className={labelClass}>Tenant *</label>
-            <select required value={formData.tenantId}
+            <label htmlFor="lease-tenant" className={labelClass}>Tenant *</label>
+            <select id="lease-tenant" required value={formData.tenantId}
               onChange={(e) => setFormData({ ...formData, tenantId: parseInt(e.target.value) })}
               className={inputClass}>
               {tenants.map(tenant => (
@@ -334,14 +347,14 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Start Date *</label>
-              <input type="date" required value={formData.startDate}
+              <label htmlFor="lease-start" className={labelClass}>Start Date *</label>
+              <input id="lease-start" type="date" required value={formData.startDate}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>End Date *</label>
-              <input type="date" required value={formData.endDate}
+              <label htmlFor="lease-end" className={labelClass}>End Date *</label>
+              <input id="lease-end" type="date" required value={formData.endDate}
                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                 className={inputClass} />
             </div>
@@ -349,15 +362,15 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Monthly Rent *</label>
-              <input type="number" required min={0} value={formData.monthlyRent}
+              <label htmlFor="lease-rent" className={labelClass}>Monthly Rent *</label>
+              <input id="lease-rent" type="number" required min={0} value={formData.monthlyRent}
                 onChange={(e) => setFormData({ ...formData, monthlyRent: parseInt(e.target.value) || 0 })}
                 placeholder={selectedProperty ? `Default: $${selectedProperty.monthlyRent}` : ''}
                 className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Deposit Amount</label>
-              <input type="number" min={0} value={formData.depositAmount || ''}
+              <label htmlFor="lease-deposit" className={labelClass}>Deposit Amount</label>
+              <input id="lease-deposit" type="number" min={0} value={formData.depositAmount || ''}
                 onChange={(e) => setFormData({ ...formData, depositAmount: parseInt(e.target.value) || undefined })}
                 className={inputClass} />
             </div>
@@ -365,8 +378,8 @@ function LeaseModal({ lease, properties, tenants, onSave, onClose, isLoading }: 
 
           {lease && (
             <div>
-              <label className={labelClass}>Status</label>
-              <select value={formData.status}
+              <label htmlFor="lease-status" className={labelClass}>Status</label>
+              <select id="lease-status" value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as LeaseCreate['status'] })}
                 className={inputClass}>
                 <option value="upcoming">Upcoming</option>

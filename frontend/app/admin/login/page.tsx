@@ -50,17 +50,18 @@ export default function AdminLoginPage() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
               Password
             </label>
             <input
+              id="password"
               type="password"
               required
               autoFocus

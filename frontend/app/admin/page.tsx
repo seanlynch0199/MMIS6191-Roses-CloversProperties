@@ -4,15 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { fetchDashboardStats } from '@/lib/api'
 import type { DashboardStats } from '@/lib/api'
-
-// ── helpers ──────────────────────────────────────────────────────────────────
-
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(amount)
+import { formatCurrency } from '@/lib/format'
 
 // ── Stat card ────────────────────────────────────────────────────────────────
 
