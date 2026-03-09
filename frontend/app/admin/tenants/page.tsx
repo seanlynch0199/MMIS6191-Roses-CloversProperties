@@ -30,7 +30,7 @@ export default function AdminTenantsPage() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<TenantCreate> }) => updateTenant(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<TenantCreate> & { password?: string } }) => updateTenant(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-tenants'] })
       setIsModalOpen(false)
@@ -63,7 +63,7 @@ export default function AdminTenantsPage() {
 
   useEscapeKey(() => setDeleteConfirm(null), !!deleteConfirm)
 
-  function handleSubmit(data: TenantCreate) {
+  function handleSubmit(data: TenantCreate & { password?: string }) {
     if (editingTenant) {
       updateMutation.mutate({ id: editingTenant.id, data })
     } else {
@@ -207,7 +207,7 @@ export default function AdminTenantsPage() {
 
 interface TenantModalProps {
   tenant: Tenant | null
-  onSave: (data: TenantCreate) => void
+  onSave: (data: TenantCreate & { password?: string }) => void
   onClose: () => void
   isLoading: boolean
 }
@@ -219,12 +219,13 @@ function TenantModal({ tenant, onSave, onClose, isLoading }: TenantModalProps) {
     email: tenant?.email || '',
     phone: tenant?.phone || '',
   })
+  const [password, setPassword] = useState('')
 
   useEscapeKey(onClose)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    onSave(formData)
+    onSave({ ...formData, ...(password ? { password } : {}) })
   }
 
   const inputClass = "w-full px-4 py-2 border border-stone-300 rounded-lg bg-white text-stone-900 focus:ring-2 focus:ring-rose-500 focus:border-transparent"
@@ -270,6 +271,23 @@ function TenantModal({ tenant, onSave, onClose, isLoading }: TenantModalProps) {
             <input id="tenant-phone" type="tel" value={formData.phone || ''}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className={inputClass} />
+          </div>
+
+          <div>
+            <label htmlFor="tenant-password" className={labelClass}>
+              {tenant ? 'Portal Password (leave blank to keep existing)' : 'Portal Password'}
+            </label>
+            <input
+              id="tenant-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={tenant ? 'Enter new password to change...' : 'Set tenant portal password...'}
+              className={inputClass}
+            />
+            <p className="text-xs text-stone-400 mt-1">
+              Tenants use this password to log into the Tenant Portal.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">

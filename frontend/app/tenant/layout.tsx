@@ -3,28 +3,23 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { isLoggedIn, adminLogout } from '@/lib/api'
+import { isTenantLoggedIn, tenantLogout } from '@/lib/api'
 
 const navItems = [
-  { href: '/admin', label: 'Dashboard', exact: true },
-  { href: '/admin/properties', label: 'Properties' },
-  { href: '/admin/tenants', label: 'Tenants' },
-  { href: '/admin/leases', label: 'Leases' },
-  { href: '/admin/requests', label: 'Requests' },
-  { href: '/admin/payments', label: 'Payments' },
+  { href: '/tenant', label: 'My Dashboard', exact: true },
+  { href: '/tenant/requests/new', label: 'Submit Request' },
 ]
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function TenantLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Skip auth check for the login page itself
-  const isLoginPage = pathname === '/admin/login'
+  const isLoginPage = pathname === '/tenant/login'
 
   useEffect(() => {
-    if (!isLoginPage && !isLoggedIn()) {
-      router.replace('/admin/login')
+    if (!isLoginPage && !isTenantLoggedIn()) {
+      router.replace('/tenant/login')
     } else {
       setAuthChecked(true)
     }
@@ -36,16 +31,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   async function handleLogout() {
-    await adminLogout()
-    router.replace('/admin/login')
+    await tenantLogout()
+    router.replace('/tenant/login')
   }
 
-  // Render login page without the admin chrome
   if (isLoginPage) {
     return <>{children}</>
   }
 
-  // Wait for auth check before rendering protected content
   if (!authChecked) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center">
@@ -60,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
-              <Link href="/admin" className="flex items-center gap-2">
+              <Link href="/tenant" className="flex items-center gap-2">
                 <svg className="w-8 h-8" viewBox="0 0 40 40" fill="none">
                   <circle cx="14" cy="12" r="6" className="fill-clover-500" />
                   <circle cx="26" cy="12" r="6" className="fill-clover-500" />
@@ -70,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <circle cx="34" cy="24" r="3" className="fill-rose-400" />
                 </svg>
                 <span className="font-bold text-white hidden sm:block">
-                  Admin Portal
+                  Tenant Portal
                 </span>
               </Link>
 
@@ -92,10 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="text-sm text-stone-400 hover:text-clover-400 transition-colors"
-              >
+              <Link href="/" className="text-sm text-stone-400 hover:text-clover-400 transition-colors">
                 Back to Site
               </Link>
               <button
@@ -109,7 +99,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </header>
 
-      {/* Mobile Navigation */}
       <div className="md:hidden bg-stone-800 border-b border-stone-700">
         <div className="flex overflow-x-auto px-4 py-2 gap-2">
           {navItems.map((item) => (

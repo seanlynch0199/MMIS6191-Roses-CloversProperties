@@ -16,6 +16,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var db *sql.DB
@@ -25,6 +26,17 @@ var (
 	tokenStore = make(map[string]time.Time)
 	tokenMutex sync.RWMutex
 )
+
+// Token store for tenant sessions (maps token → tenant ID)
+var (
+	tenantTokenStore = make(map[string]tenantSession)
+	tenantTokenMutex sync.RWMutex
+)
+
+type tenantSession struct {
+	TenantID int
+	Expiry   time.Time
+}
 
 // ============================================================================
 // MODELS
@@ -101,12 +113,51 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type TenantLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type LoginResponse struct {
 	Token string `json:"token"`
 }
 
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+type MaintenanceRequest struct {
+	ID          int       `json:"id"`
+	TenantID    int       `json:"tenantId"`
+	PropertyID  int       `json:"propertyId"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Category    string    `json:"category"`
+	Priority    string    `json:"priority"`
+	Status      string    `json:"status"`
+	AdminNotes  *string   `json:"adminNotes,omitempty"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	// Joined fields
+	TenantName   *string `json:"tenantName,omitempty"`
+	PropertyName *string `json:"propertyName,omitempty"`
+}
+
+type Payment struct {
+	ID          int       `json:"id"`
+	LeaseID     int       `json:"leaseId"`
+	TenantID    int       `json:"tenantId"`
+	PropertyID  int       `json:"propertyId"`
+	Amount      float64   `json:"amount"`
+	PaymentDate string    `json:"paymentDate"`
+	PaymentType string    `json:"paymentType"`
+	Status      string    `json:"status"`
+	Notes       *string   `json:"notes,omitempty"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	// Joined fields
+	TenantName   *string `json:"tenantName,omitempty"`
+	PropertyName *string `json:"propertyName,omitempty"`
 }
 
 // ============================================================================
@@ -154,6 +205,25 @@ func main() {
 	// Admin leases
 	http.HandleFunc("/api/admin/leases", adminLeasesHandler)
 	http.HandleFunc("/api/admin/leases/", adminLeaseByIDHandler)
+
+	// Admin maintenance requests
+	http.HandleFunc("/api/admin/requests", adminRequestsHandler)
+	http.HandleFunc("/api/admin/requests/", adminRequestByIDHandler)
+
+	// Admin payments
+	http.HandleFunc("/api/admin/payments", adminPaymentsHandler)
+	http.HandleFunc("/api/admin/payments/", adminPaymentByIDHandler)
+
+	// Tenant auth
+	http.HandleFunc("/api/tenant/login", tenantLoginHandler)
+	http.HandleFunc("/api/tenant/logout", tenantLogoutHandler)
+	http.HandleFunc("/api/tenant/me", tenantMeHandler)
+
+	// Tenant portal
+	http.HandleFunc("/api/tenant/requests", tenantRequestsHandler)
+	http.HandleFunc("/api/tenant/requests/", tenantRequestByIDHandler)
+	http.HandleFunc("/api/tenant/payments", tenantPaymentsHandler)
+	http.HandleFunc("/api/tenant/lease", tenantLeaseHandler)
 
 	port := getEnv("PORT", "8080")
 	fmt.Printf("Roses & Clovers Properties API starting on port %s...\n", port)
@@ -855,23 +925,38 @@ func getTenantByID(w http.ResponseWriter, id int) {
 }
 
 func createTenant(w http.ResponseWriter, r *http.Request) {
-	var t Tenant
-	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
+	var body struct {
+		Tenant
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
+	t := body.Tenant
 
 	if t.FirstName == "" || t.LastName == "" || t.Email == "" {
 		jsonError(w, "First name, last name, and email are required", http.StatusBadRequest)
 		return
 	}
 
+	var passwordHash *string
+	if body.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+		if err != nil {
+			jsonError(w, "Failed to hash password", http.StatusInternalServerError)
+			return
+		}
+		h := string(hash)
+		passwordHash = &h
+	}
+
 	result, err := db.Exec(`
 		INSERT INTO tenants (first_name, last_name, email, phone, date_of_birth,
-			emergency_contact_name, emergency_contact_phone, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			emergency_contact_name, emergency_contact_phone, notes, password_hash)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, t.FirstName, t.LastName, t.Email, t.Phone, t.DateOfBirth,
-		t.EmergencyContactName, t.EmergencyContactPhone, t.Notes)
+		t.EmergencyContactName, t.EmergencyContactPhone, t.Notes, passwordHash)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
@@ -892,10 +977,24 @@ func createTenant(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateTenant(w http.ResponseWriter, r *http.Request, id int) {
-	var t Tenant
-	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
+	var body struct {
+		Tenant
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "Invalid JSON", http.StatusBadRequest)
 		return
+	}
+	t := body.Tenant
+
+	// If a new password was provided, hash and update it separately
+	if body.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+		if err != nil {
+			jsonError(w, "Failed to hash password", http.StatusInternalServerError)
+			return
+		}
+		db.Exec("UPDATE tenants SET password_hash=? WHERE id=?", string(hash), id)
 	}
 
 	result, err := db.Exec(`
@@ -1454,4 +1553,898 @@ func scanLeaseWithJoinsRow(row *sql.Row) (Lease, error) {
 	}
 
 	return l, nil
+}
+
+// ============================================================================
+// HANDLERS - TENANT AUTH
+// ============================================================================
+
+func tenantLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req TenantLoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if req.Email == "" || req.Password == "" {
+		jsonError(w, "Email and password are required", http.StatusBadRequest)
+		return
+	}
+
+	var tenantID int
+	var passwordHash sql.NullString
+	err := db.QueryRow("SELECT id, password_hash FROM tenants WHERE email = ?", req.Email).
+		Scan(&tenantID, &passwordHash)
+	if err == sql.ErrNoRows {
+		jsonError(w, "Invalid email or password", http.StatusUnauthorized)
+		return
+	}
+	if err != nil {
+		log.Printf("Error looking up tenant: %v", err)
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	if !passwordHash.Valid || passwordHash.String == "" {
+		jsonError(w, "Portal access not set up for this account. Contact your property manager.", http.StatusUnauthorized)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash.String), []byte(req.Password)); err != nil {
+		jsonError(w, "Invalid email or password", http.StatusUnauthorized)
+		return
+	}
+
+	token := generateToken()
+	tenantTokenMutex.Lock()
+	tenantTokenStore[token] = tenantSession{TenantID: tenantID, Expiry: time.Now().Add(24 * time.Hour)}
+	tenantTokenMutex.Unlock()
+
+	jsonResponse(w, LoginResponse{Token: token}, http.StatusOK)
+}
+
+func tenantLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" {
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) == 2 && parts[0] == "Bearer" {
+			tenantTokenMutex.Lock()
+			delete(tenantTokenStore, parts[1])
+			tenantTokenMutex.Unlock()
+		}
+	}
+
+	jsonResponse(w, map[string]string{"message": "Logged out"}, http.StatusOK)
+}
+
+func tenantMeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tenantID, ok := requireTenantAuth(w, r)
+	if !ok {
+		return
+	}
+
+	row := db.QueryRow(`
+		SELECT id, first_name, last_name, email, phone, date_of_birth,
+			   emergency_contact_name, emergency_contact_phone, notes, created_at, updated_at
+		FROM tenants WHERE id = ?
+	`, tenantID)
+
+	t, err := scanTenantRow(row)
+	if err != nil {
+		jsonError(w, "Tenant not found", http.StatusNotFound)
+		return
+	}
+
+	jsonResponse(w, t, http.StatusOK)
+}
+
+// requireTenantAuth validates the tenant token and returns (tenantID, true) or writes 401 and returns (0, false).
+func requireTenantAuth(w http.ResponseWriter, r *http.Request) (int, bool) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
+		return 0, false
+	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
+		return 0, false
+	}
+
+	token := parts[1]
+
+	tenantTokenMutex.RLock()
+	session, exists := tenantTokenStore[token]
+	tenantTokenMutex.RUnlock()
+
+	if !exists || time.Now().After(session.Expiry) {
+		if exists {
+			tenantTokenMutex.Lock()
+			delete(tenantTokenStore, token)
+			tenantTokenMutex.Unlock()
+		}
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
+		return 0, false
+	}
+
+	return session.TenantID, true
+}
+
+// ============================================================================
+// HANDLERS - TENANT PORTAL
+// ============================================================================
+
+func tenantLeaseHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tenantID, ok := requireTenantAuth(w, r)
+	if !ok {
+		return
+	}
+
+	row := db.QueryRow(`
+		SELECT l.id, l.property_id, l.tenant_id, l.start_date, l.end_date,
+			   l.monthly_rent, l.deposit_amount, l.status, l.payment_due_day,
+			   l.notes, l.created_at, l.updated_at,
+			   p.name as property_name,
+			   CONCAT(t.first_name, ' ', t.last_name) as tenant_name
+		FROM leases l
+		JOIN properties p ON l.property_id = p.id
+		JOIN tenants t ON l.tenant_id = t.id
+		WHERE l.tenant_id = ? AND l.status IN ('active', 'upcoming')
+		ORDER BY l.start_date DESC
+		LIMIT 1
+	`, tenantID)
+
+	l, err := scanLeaseWithJoinsRow(row)
+	if err == sql.ErrNoRows {
+		row2 := db.QueryRow(`
+			SELECT l.id, l.property_id, l.tenant_id, l.start_date, l.end_date,
+				   l.monthly_rent, l.deposit_amount, l.status, l.payment_due_day,
+				   l.notes, l.created_at, l.updated_at,
+				   p.name as property_name,
+				   CONCAT(t.first_name, ' ', t.last_name) as tenant_name
+			FROM leases l
+			JOIN properties p ON l.property_id = p.id
+			JOIN tenants t ON l.tenant_id = t.id
+			WHERE l.tenant_id = ?
+			ORDER BY l.end_date DESC
+			LIMIT 1
+		`, tenantID)
+		l, err = scanLeaseWithJoinsRow(row2)
+		if err == sql.ErrNoRows {
+			jsonResponse(w, nil, http.StatusOK)
+			return
+		}
+	}
+	if err != nil {
+		log.Printf("Error getting tenant lease: %v", err)
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse(w, l, http.StatusOK)
+}
+
+func tenantRequestsHandler(w http.ResponseWriter, r *http.Request) {
+	tenantID, ok := requireTenantAuth(w, r)
+	if !ok {
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		getTenantRequests(w, tenantID)
+	case http.MethodPost:
+		submitTenantRequest(w, r, tenantID)
+	default:
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func tenantRequestByIDHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tenantID, ok := requireTenantAuth(w, r)
+	if !ok {
+		return
+	}
+
+	id, err := extractID(r.URL.Path, "/api/tenant/requests/")
+	if err != nil {
+		jsonError(w, "Invalid request ID", http.StatusBadRequest)
+		return
+	}
+
+	row := db.QueryRow(`
+		SELECT mr.id, mr.tenant_id, mr.property_id, mr.title, mr.description,
+			   mr.category, mr.priority, mr.status, mr.admin_notes,
+			   mr.created_at, mr.updated_at,
+			   p.name as property_name
+		FROM maintenance_requests mr
+		JOIN properties p ON mr.property_id = p.id
+		WHERE mr.id = ? AND mr.tenant_id = ?
+	`, id, tenantID)
+
+	req, err := scanMaintenanceRequestRow(row)
+	if err == sql.ErrNoRows {
+		jsonError(w, "Request not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse(w, req, http.StatusOK)
+}
+
+func getTenantRequests(w http.ResponseWriter, tenantID int) {
+	rows, err := db.Query(`
+		SELECT mr.id, mr.tenant_id, mr.property_id, mr.title, mr.description,
+			   mr.category, mr.priority, mr.status, mr.admin_notes,
+			   mr.created_at, mr.updated_at,
+			   p.name as property_name
+		FROM maintenance_requests mr
+		JOIN properties p ON mr.property_id = p.id
+		WHERE mr.tenant_id = ?
+		ORDER BY mr.created_at DESC
+	`, tenantID)
+	if err != nil {
+		log.Printf("Error querying tenant requests: %v", err)
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	requests := []MaintenanceRequest{}
+	for rows.Next() {
+		req, err := scanMaintenanceRequest(rows)
+		if err != nil {
+			log.Printf("Error scanning request: %v", err)
+			continue
+		}
+		requests = append(requests, req)
+	}
+
+	jsonResponse(w, requests, http.StatusOK)
+}
+
+func submitTenantRequest(w http.ResponseWriter, r *http.Request, tenantID int) {
+	var req MaintenanceRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if req.Title == "" || req.Description == "" {
+		jsonError(w, "Title and description are required", http.StatusBadRequest)
+		return
+	}
+	if req.Category == "" {
+		req.Category = "other"
+	}
+	if req.Priority == "" {
+		req.Priority = "medium"
+	}
+
+	var propertyID int
+	err := db.QueryRow(`
+		SELECT property_id FROM leases
+		WHERE tenant_id = ? AND status IN ('active', 'upcoming')
+		ORDER BY start_date DESC LIMIT 1
+	`, tenantID).Scan(&propertyID)
+	if err == sql.ErrNoRows {
+		jsonError(w, "No active lease found. Cannot submit a request without an active lease.", http.StatusBadRequest)
+		return
+	}
+	if err != nil {
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	result, err := db.Exec(`
+		INSERT INTO maintenance_requests (tenant_id, property_id, title, description, category, priority, status)
+		VALUES (?, ?, ?, ?, ?, ?, 'open')
+	`, tenantID, propertyID, req.Title, req.Description, req.Category, req.Priority)
+	if err != nil {
+		log.Printf("Error creating maintenance request: %v", err)
+		jsonError(w, "Failed to submit request", http.StatusInternalServerError)
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	req.ID = int(id)
+	req.TenantID = tenantID
+	req.PropertyID = propertyID
+	req.Status = "open"
+	req.CreatedAt = time.Now()
+	req.UpdatedAt = time.Now()
+
+	jsonResponse(w, req, http.StatusCreated)
+}
+
+func tenantPaymentsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tenantID, ok := requireTenantAuth(w, r)
+	if !ok {
+		return
+	}
+
+	rows, err := db.Query(`
+		SELECT p.id, p.lease_id, p.tenant_id, p.property_id, p.amount,
+			   p.payment_date, p.payment_type, p.status, p.notes,
+			   p.created_at, p.updated_at,
+			   prop.name as property_name
+		FROM payments p
+		JOIN properties prop ON p.property_id = prop.id
+		WHERE p.tenant_id = ?
+		ORDER BY p.payment_date DESC
+	`, tenantID)
+	if err != nil {
+		log.Printf("Error querying tenant payments: %v", err)
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	payments := []Payment{}
+	for rows.Next() {
+		pay, err := scanPayment(rows)
+		if err != nil {
+			log.Printf("Error scanning payment: %v", err)
+			continue
+		}
+		payments = append(payments, pay)
+	}
+
+	jsonResponse(w, payments, http.StatusOK)
+}
+
+// ============================================================================
+// HANDLERS - ADMIN MAINTENANCE REQUESTS
+// ============================================================================
+
+func adminRequestsHandler(w http.ResponseWriter, r *http.Request) {
+	if !requireAuth(w, r) {
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := `
+		SELECT mr.id, mr.tenant_id, mr.property_id, mr.title, mr.description,
+			   mr.category, mr.priority, mr.status, mr.admin_notes,
+			   mr.created_at, mr.updated_at,
+			   CONCAT(t.first_name, ' ', t.last_name) as tenant_name,
+			   p.name as property_name
+		FROM maintenance_requests mr
+		JOIN tenants t ON mr.tenant_id = t.id
+		JOIN properties p ON mr.property_id = p.id
+		WHERE 1=1
+	`
+	args := []interface{}{}
+
+	if status := r.URL.Query().Get("status"); status != "" {
+		query += " AND mr.status = ?"
+		args = append(args, status)
+	}
+	if propertyID := r.URL.Query().Get("propertyId"); propertyID != "" {
+		if id, err := strconv.Atoi(propertyID); err == nil {
+			query += " AND mr.property_id = ?"
+			args = append(args, id)
+		}
+	}
+	if tenantID := r.URL.Query().Get("tenantId"); tenantID != "" {
+		if id, err := strconv.Atoi(tenantID); err == nil {
+			query += " AND mr.tenant_id = ?"
+			args = append(args, id)
+		}
+	}
+
+	query += " ORDER BY mr.created_at DESC"
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		log.Printf("Error querying requests: %v", err)
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	requests := []MaintenanceRequest{}
+	for rows.Next() {
+		req, err := scanMaintenanceRequestWithTenant(rows)
+		if err != nil {
+			log.Printf("Error scanning request: %v", err)
+			continue
+		}
+		requests = append(requests, req)
+	}
+
+	jsonResponse(w, requests, http.StatusOK)
+}
+
+func adminRequestByIDHandler(w http.ResponseWriter, r *http.Request) {
+	if !requireAuth(w, r) {
+		return
+	}
+
+	id, err := extractID(r.URL.Path, "/api/admin/requests/")
+	if err != nil {
+		jsonError(w, "Invalid request ID", http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		getAdminRequestByID(w, id)
+	case http.MethodPut:
+		updateAdminRequest(w, r, id)
+	default:
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func getAdminRequestByID(w http.ResponseWriter, id int) {
+	row := db.QueryRow(`
+		SELECT mr.id, mr.tenant_id, mr.property_id, mr.title, mr.description,
+			   mr.category, mr.priority, mr.status, mr.admin_notes,
+			   mr.created_at, mr.updated_at,
+			   CONCAT(t.first_name, ' ', t.last_name) as tenant_name,
+			   p.name as property_name
+		FROM maintenance_requests mr
+		JOIN tenants t ON mr.tenant_id = t.id
+		JOIN properties p ON mr.property_id = p.id
+		WHERE mr.id = ?
+	`, id)
+
+	req, err := scanMaintenanceRequestWithTenantRow(row)
+	if err == sql.ErrNoRows {
+		jsonError(w, "Request not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse(w, req, http.StatusOK)
+}
+
+func updateAdminRequest(w http.ResponseWriter, r *http.Request, id int) {
+	var body struct {
+		Status     string  `json:"status"`
+		AdminNotes *string `json:"adminNotes"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	result, err := db.Exec(`
+		UPDATE maintenance_requests SET status=?, admin_notes=? WHERE id=?
+	`, body.Status, body.AdminNotes, id)
+	if err != nil {
+		log.Printf("Error updating request: %v", err)
+		jsonError(w, "Failed to update request", http.StatusInternalServerError)
+		return
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		jsonError(w, "Request not found", http.StatusNotFound)
+		return
+	}
+
+	getAdminRequestByID(w, id)
+}
+
+// ============================================================================
+// HANDLERS - ADMIN PAYMENTS
+// ============================================================================
+
+func adminPaymentsHandler(w http.ResponseWriter, r *http.Request) {
+	if !requireAuth(w, r) {
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		getAdminPayments(w, r)
+	case http.MethodPost:
+		createAdminPayment(w, r)
+	default:
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func adminPaymentByIDHandler(w http.ResponseWriter, r *http.Request) {
+	if !requireAuth(w, r) {
+		return
+	}
+
+	id, err := extractID(r.URL.Path, "/api/admin/payments/")
+	if err != nil {
+		jsonError(w, "Invalid payment ID", http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		getAdminPaymentByID(w, id)
+	case http.MethodPut:
+		updateAdminPayment(w, r, id)
+	case http.MethodDelete:
+		deleteAdminPayment(w, id)
+	default:
+		jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func getAdminPayments(w http.ResponseWriter, r *http.Request) {
+	query := `
+		SELECT p.id, p.lease_id, p.tenant_id, p.property_id, p.amount,
+			   p.payment_date, p.payment_type, p.status, p.notes,
+			   p.created_at, p.updated_at,
+			   CONCAT(t.first_name, ' ', t.last_name) as tenant_name,
+			   prop.name as property_name
+		FROM payments p
+		JOIN tenants t ON p.tenant_id = t.id
+		JOIN properties prop ON p.property_id = prop.id
+		WHERE 1=1
+	`
+	args := []interface{}{}
+
+	if tenantID := r.URL.Query().Get("tenantId"); tenantID != "" {
+		if id, err := strconv.Atoi(tenantID); err == nil {
+			query += " AND p.tenant_id = ?"
+			args = append(args, id)
+		}
+	}
+	if leaseID := r.URL.Query().Get("leaseId"); leaseID != "" {
+		if id, err := strconv.Atoi(leaseID); err == nil {
+			query += " AND p.lease_id = ?"
+			args = append(args, id)
+		}
+	}
+	if status := r.URL.Query().Get("status"); status != "" {
+		query += " AND p.status = ?"
+		args = append(args, status)
+	}
+	if payType := r.URL.Query().Get("type"); payType != "" {
+		query += " AND p.payment_type = ?"
+		args = append(args, payType)
+	}
+
+	query += " ORDER BY p.payment_date DESC"
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		log.Printf("Error querying payments: %v", err)
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	payments := []Payment{}
+	for rows.Next() {
+		pay, err := scanPaymentWithJoins(rows)
+		if err != nil {
+			log.Printf("Error scanning payment: %v", err)
+			continue
+		}
+		payments = append(payments, pay)
+	}
+
+	jsonResponse(w, payments, http.StatusOK)
+}
+
+func createAdminPayment(w http.ResponseWriter, r *http.Request) {
+	var pay Payment
+	if err := json.NewDecoder(r.Body).Decode(&pay); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if pay.LeaseID == 0 || pay.Amount == 0 || pay.PaymentDate == "" {
+		jsonError(w, "Lease, amount, and payment date are required", http.StatusBadRequest)
+		return
+	}
+	if pay.PaymentType == "" {
+		pay.PaymentType = "rent"
+	}
+	if pay.Status == "" {
+		pay.Status = "completed"
+	}
+
+	err := db.QueryRow("SELECT tenant_id, property_id FROM leases WHERE id = ?", pay.LeaseID).
+		Scan(&pay.TenantID, &pay.PropertyID)
+	if err == sql.ErrNoRows {
+		jsonError(w, "Lease not found", http.StatusBadRequest)
+		return
+	}
+	if err != nil {
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	result, err := db.Exec(`
+		INSERT INTO payments (lease_id, tenant_id, property_id, amount, payment_date, payment_type, status, notes)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+	`, pay.LeaseID, pay.TenantID, pay.PropertyID, pay.Amount, pay.PaymentDate,
+		pay.PaymentType, pay.Status, pay.Notes)
+	if err != nil {
+		log.Printf("Error creating payment: %v", err)
+		jsonError(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	pay.ID = int(id)
+	pay.CreatedAt = time.Now()
+	pay.UpdatedAt = time.Now()
+
+	jsonResponse(w, pay, http.StatusCreated)
+}
+
+func getAdminPaymentByID(w http.ResponseWriter, id int) {
+	row := db.QueryRow(`
+		SELECT p.id, p.lease_id, p.tenant_id, p.property_id, p.amount,
+			   p.payment_date, p.payment_type, p.status, p.notes,
+			   p.created_at, p.updated_at,
+			   CONCAT(t.first_name, ' ', t.last_name) as tenant_name,
+			   prop.name as property_name
+		FROM payments p
+		JOIN tenants t ON p.tenant_id = t.id
+		JOIN properties prop ON p.property_id = prop.id
+		WHERE p.id = ?
+	`, id)
+
+	pay, err := scanPaymentWithJoinsRow(row)
+	if err == sql.ErrNoRows {
+		jsonError(w, "Payment not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		jsonError(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse(w, pay, http.StatusOK)
+}
+
+func updateAdminPayment(w http.ResponseWriter, r *http.Request, id int) {
+	var pay Payment
+	if err := json.NewDecoder(r.Body).Decode(&pay); err != nil {
+		jsonError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	result, err := db.Exec(`
+		UPDATE payments SET amount=?, payment_date=?, payment_type=?, status=?, notes=?
+		WHERE id=?
+	`, pay.Amount, pay.PaymentDate, pay.PaymentType, pay.Status, pay.Notes, id)
+	if err != nil {
+		log.Printf("Error updating payment: %v", err)
+		jsonError(w, "Failed to update payment", http.StatusInternalServerError)
+		return
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		jsonError(w, "Payment not found", http.StatusNotFound)
+		return
+	}
+
+	getAdminPaymentByID(w, id)
+}
+
+func deleteAdminPayment(w http.ResponseWriter, id int) {
+	result, err := db.Exec("DELETE FROM payments WHERE id = ?", id)
+	if err != nil {
+		log.Printf("Error deleting payment: %v", err)
+		jsonError(w, "Failed to delete payment", http.StatusInternalServerError)
+		return
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		jsonError(w, "Payment not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ============================================================================
+// SCAN HELPERS - MAINTENANCE REQUESTS & PAYMENTS
+// ============================================================================
+
+func scanMaintenanceRequest(rows *sql.Rows) (MaintenanceRequest, error) {
+	var req MaintenanceRequest
+	var adminNotes, propertyName sql.NullString
+
+	err := rows.Scan(&req.ID, &req.TenantID, &req.PropertyID, &req.Title, &req.Description,
+		&req.Category, &req.Priority, &req.Status, &adminNotes,
+		&req.CreatedAt, &req.UpdatedAt, &propertyName)
+	if err != nil {
+		return req, err
+	}
+
+	if adminNotes.Valid {
+		req.AdminNotes = &adminNotes.String
+	}
+	if propertyName.Valid {
+		req.PropertyName = &propertyName.String
+	}
+
+	return req, nil
+}
+
+func scanMaintenanceRequestRow(row *sql.Row) (MaintenanceRequest, error) {
+	var req MaintenanceRequest
+	var adminNotes, propertyName sql.NullString
+
+	err := row.Scan(&req.ID, &req.TenantID, &req.PropertyID, &req.Title, &req.Description,
+		&req.Category, &req.Priority, &req.Status, &adminNotes,
+		&req.CreatedAt, &req.UpdatedAt, &propertyName)
+	if err != nil {
+		return req, err
+	}
+
+	if adminNotes.Valid {
+		req.AdminNotes = &adminNotes.String
+	}
+	if propertyName.Valid {
+		req.PropertyName = &propertyName.String
+	}
+
+	return req, nil
+}
+
+func scanMaintenanceRequestWithTenant(rows *sql.Rows) (MaintenanceRequest, error) {
+	var req MaintenanceRequest
+	var adminNotes, tenantName, propertyName sql.NullString
+
+	err := rows.Scan(&req.ID, &req.TenantID, &req.PropertyID, &req.Title, &req.Description,
+		&req.Category, &req.Priority, &req.Status, &adminNotes,
+		&req.CreatedAt, &req.UpdatedAt, &tenantName, &propertyName)
+	if err != nil {
+		return req, err
+	}
+
+	if adminNotes.Valid {
+		req.AdminNotes = &adminNotes.String
+	}
+	if tenantName.Valid {
+		req.TenantName = &tenantName.String
+	}
+	if propertyName.Valid {
+		req.PropertyName = &propertyName.String
+	}
+
+	return req, nil
+}
+
+func scanMaintenanceRequestWithTenantRow(row *sql.Row) (MaintenanceRequest, error) {
+	var req MaintenanceRequest
+	var adminNotes, tenantName, propertyName sql.NullString
+
+	err := row.Scan(&req.ID, &req.TenantID, &req.PropertyID, &req.Title, &req.Description,
+		&req.Category, &req.Priority, &req.Status, &adminNotes,
+		&req.CreatedAt, &req.UpdatedAt, &tenantName, &propertyName)
+	if err != nil {
+		return req, err
+	}
+
+	if adminNotes.Valid {
+		req.AdminNotes = &adminNotes.String
+	}
+	if tenantName.Valid {
+		req.TenantName = &tenantName.String
+	}
+	if propertyName.Valid {
+		req.PropertyName = &propertyName.String
+	}
+
+	return req, nil
+}
+
+func scanPayment(rows *sql.Rows) (Payment, error) {
+	var pay Payment
+	var notes, propertyName sql.NullString
+
+	err := rows.Scan(&pay.ID, &pay.LeaseID, &pay.TenantID, &pay.PropertyID, &pay.Amount,
+		&pay.PaymentDate, &pay.PaymentType, &pay.Status, &notes,
+		&pay.CreatedAt, &pay.UpdatedAt, &propertyName)
+	if err != nil {
+		return pay, err
+	}
+
+	if notes.Valid {
+		pay.Notes = &notes.String
+	}
+	if propertyName.Valid {
+		pay.PropertyName = &propertyName.String
+	}
+
+	return pay, nil
+}
+
+func scanPaymentWithJoins(rows *sql.Rows) (Payment, error) {
+	var pay Payment
+	var notes, tenantName, propertyName sql.NullString
+
+	err := rows.Scan(&pay.ID, &pay.LeaseID, &pay.TenantID, &pay.PropertyID, &pay.Amount,
+		&pay.PaymentDate, &pay.PaymentType, &pay.Status, &notes,
+		&pay.CreatedAt, &pay.UpdatedAt, &tenantName, &propertyName)
+	if err != nil {
+		return pay, err
+	}
+
+	if notes.Valid {
+		pay.Notes = &notes.String
+	}
+	if tenantName.Valid {
+		pay.TenantName = &tenantName.String
+	}
+	if propertyName.Valid {
+		pay.PropertyName = &propertyName.String
+	}
+
+	return pay, nil
+}
+
+func scanPaymentWithJoinsRow(row *sql.Row) (Payment, error) {
+	var pay Payment
+	var notes, tenantName, propertyName sql.NullString
+
+	err := row.Scan(&pay.ID, &pay.LeaseID, &pay.TenantID, &pay.PropertyID, &pay.Amount,
+		&pay.PaymentDate, &pay.PaymentType, &pay.Status, &notes,
+		&pay.CreatedAt, &pay.UpdatedAt, &tenantName, &propertyName)
+	if err != nil {
+		return pay, err
+	}
+
+	if notes.Valid {
+		pay.Notes = &notes.String
+	}
+	if tenantName.Valid {
+		pay.TenantName = &tenantName.String
+	}
+	if propertyName.Valid {
+		pay.PropertyName = &propertyName.String
+	}
+
+	return pay, nil
 }

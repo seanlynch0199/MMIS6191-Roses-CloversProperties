@@ -90,6 +90,47 @@ export interface LeaseCreate {
   status?: LeaseStatus
 }
 
+// Maintenance request types
+export type MaintenanceCategory = 'plumbing' | 'electrical' | 'hvac' | 'appliance' | 'structural' | 'pest_control' | 'landscaping' | 'other'
+export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent'
+export type MaintenanceStatus = 'open' | 'in_progress' | 'resolved' | 'closed'
+
+export interface MaintenanceRequest {
+  id: number
+  tenantId: number
+  propertyId: number
+  title: string
+  description: string
+  category: MaintenanceCategory
+  priority: MaintenancePriority
+  status: MaintenanceStatus
+  adminNotes?: string | null
+  createdAt?: string
+  updatedAt?: string
+  tenantName?: string
+  propertyName?: string
+}
+
+// Payment types
+export type PaymentType = 'rent' | 'deposit' | 'late_fee' | 'other'
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded'
+
+export interface Payment {
+  id: number
+  leaseId: number
+  tenantId: number
+  propertyId: number
+  amount: number
+  paymentDate: string
+  paymentType: PaymentType
+  status: PaymentStatus
+  notes?: string | null
+  createdAt?: string
+  updatedAt?: string
+  tenantName?: string
+  propertyName?: string
+}
+
 // API Response types
 export interface ApiError {
   error: string

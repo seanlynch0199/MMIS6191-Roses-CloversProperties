@@ -42,8 +42,8 @@ export function SiteHeader() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Don't show header on admin pages (they have their own)
-  if (pathname.startsWith('/admin')) {
+  // Don't show header on admin or tenant portal pages (they have their own layout)
+  if (pathname.startsWith('/admin') || pathname.startsWith('/tenant')) {
     return null
   }
 
@@ -80,6 +80,17 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/tenant/login"
+              className={cn(
+                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                pathname.startsWith('/tenant')
+                  ? 'text-clover-400 bg-stone-700'
+                  : 'text-stone-300 hover:text-clover-400 hover:bg-stone-700'
+              )}
+            >
+              Tenant Portal
+            </Link>
             <Link
               href="/admin"
               className="ml-2 px-4 py-2 text-sm font-medium text-white bg-clover-600 hover:bg-clover-700 rounded-md transition-colors"
@@ -125,6 +136,13 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/tenant/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-4 py-2 text-sm font-medium text-stone-300 hover:text-clover-400 rounded-md transition-colors"
+            >
+              Tenant Portal
+            </Link>
             <Link
               href="/admin"
               onClick={() => setMobileMenuOpen(false)}

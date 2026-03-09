@@ -5,6 +5,8 @@ import {
   TenantCreate,
   Lease,
   LeaseCreate,
+  MaintenanceRequest,
+  Payment,
   ApiError,
 } from '@/data/types'
 
@@ -15,6 +17,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
 // ============================================================================
 
 const TOKEN_KEY = 'rc_token'
+const TENANT_TOKEN_KEY = 'rc_tenant_token'
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -31,6 +34,23 @@ export function clearToken(): void {
 
 export function isLoggedIn(): boolean {
   return !!getToken()
+}
+
+export function getTenantToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(TENANT_TOKEN_KEY)
+}
+
+export function setTenantToken(token: string): void {
+  localStorage.setItem(TENANT_TOKEN_KEY, token)
+}
+
+export function clearTenantToken(): void {
+  localStorage.removeItem(TENANT_TOKEN_KEY)
+}
+
+export function isTenantLoggedIn(): boolean {
+  return !!getTenantToken()
 }
 
 // ============================================================================
@@ -258,4 +278,170 @@ export async function updateLease(id: number, data: Partial<LeaseCreate>): Promi
 
 export async function deleteLease(id: number): Promise<void> {
   return authFetch<void>(`/api/admin/leases/${id}`, { method: 'DELETE' })
+}
+
+// ============================================================================
+// TENANT FETCH WRAPPER
+// ============================================================================
+
+export async function tenantFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getTenantToken()
+  const headers: Record<string, string> = {
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: { ...headers, ...(options.headers as Record<string, string> || {}) },
+  })
+
+  if (res.status === 401) {
+    clearTenantToken()
+    if (typeof window !== 'undefined') {
+      window.location.href = '/tenant/login'
+    }
+    throw new Error('Session expired. Please log in again.')
+  }
+
+  if (!res.ok) {
+    const body: ApiError = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+    throw new Error(body.error || `HTTP ${res.status}`)
+  }
+
+  if (res.status === 204) return undefined as T
+  return res.json()
+}
+
+// ============================================================================
+// TENANT AUTH
+// ============================================================================
+
+export async function tenantLogin(email: string, password: string): Promise<string> {
+  const res = await fetch(`${BASE_URL}/api/tenant/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  if (!res.ok) {
+    const error: ApiError = await res.json().catch(() => ({ error: 'Login failed' }))
+    throw new Error(error.error || 'Login failed')
+  }
+  const data = await res.json()
+  setTenantToken(data.token)
+  return data.token
+}
+
+export async function tenantLogout(): Promise<void> {
+  try {
+    await fetch(`${BASE_URL}/api/tenant/logout`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${getTenantToken() || ''}` },
+    })
+  } finally {
+    clearTenantToken()
+  }
+}
+
+// ============================================================================
+// TENANT PORTAL ENDPOINTS
+// ============================================================================
+
+export async function fetchMyLease(): Promise<Lease | null> {
+  return tenantFetch<Lease | null>('/api/tenant/lease')
+}
+
+export async function fetchMyRequests(): Promise<MaintenanceRequest[]> {
+  return tenantFetch<MaintenanceRequest[]>('/api/tenant/requests')
+}
+
+export async function submitRequest(data: {
+  title: string
+  description: string
+  category: string
+  priority: string
+}): Promise<MaintenanceRequest> {
+  return tenantFetch<MaintenanceRequest>('/api/tenant/requests', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function fetchMyPayments(): Promise<Payment[]> {
+  return tenantFetch<Payment[]>('/api/tenant/payments')
+}
+
+// ============================================================================
+// ADMIN MAINTENANCE REQUESTS
+// ============================================================================
+
+export interface RequestFilters {
+  status?: string
+  propertyId?: number
+  tenantId?: number
+}
+
+export async function fetchAdminRequests(filters?: RequestFilters): Promise<MaintenanceRequest[]> {
+  const params = new URLSearchParams()
+  if (filters?.status) params.set('status', filters.status)
+  if (filters?.propertyId) params.set('propertyId', String(filters.propertyId))
+  if (filters?.tenantId) params.set('tenantId', String(filters.tenantId))
+  const qs = params.toString()
+  return authFetch<MaintenanceRequest[]>(`/api/admin/requests${qs ? `?${qs}` : ''}`)
+}
+
+export async function updateAdminRequest(
+  id: number,
+  data: { status: string; adminNotes?: string | null }
+): Promise<MaintenanceRequest> {
+  return authFetch<MaintenanceRequest>(`/api/admin/requests/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+// ============================================================================
+// ADMIN PAYMENTS
+// ============================================================================
+
+export interface PaymentFilters {
+  tenantId?: number
+  leaseId?: number
+  status?: string
+  type?: string
+}
+
+export async function fetchAdminPayments(filters?: PaymentFilters): Promise<Payment[]> {
+  const params = new URLSearchParams()
+  if (filters?.tenantId) params.set('tenantId', String(filters.tenantId))
+  if (filters?.leaseId) params.set('leaseId', String(filters.leaseId))
+  if (filters?.status) params.set('status', filters.status)
+  if (filters?.type) params.set('type', filters.type)
+  const qs = params.toString()
+  return authFetch<Payment[]>(`/api/admin/payments${qs ? `?${qs}` : ''}`)
+}
+
+export async function createPayment(data: {
+  leaseId: number
+  amount: number
+  paymentDate: string
+  paymentType?: string
+  status?: string
+  notes?: string
+}): Promise<Payment> {
+  return authFetch<Payment>('/api/admin/payments', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function updatePayment(id: number, data: Partial<Payment>): Promise<Payment> {
+  return authFetch<Payment>(`/api/admin/payments/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deletePayment(id: number): Promise<void> {
+  return authFetch<void>(`/api/admin/payments/${id}`, { method: 'DELETE' })
 }
